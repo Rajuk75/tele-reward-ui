@@ -148,17 +148,6 @@ export default function OfferExpandedRow({ offer: o }) {
                             </div>
                         </div>
                     </div>
-
-                    {o.advertiserPostbackUrl && (
-                        <div className="pt-2 border-t border-slate-200 text-xs">
-                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
-                                Advertiser Postback URL
-                            </span>
-                            <code className="text-[11px] font-mono text-slate-800 break-all select-all block bg-white p-2 rounded border border-slate-200">
-                                {o.advertiserPostbackUrl}
-                            </code>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

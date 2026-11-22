@@ -14,7 +14,7 @@ const STEPS = [
     { id: 1, title: 'Campaign & Info', short: 'Basic' },
     { id: 2, title: 'User Payouts', short: 'Payouts' },
     { id: 3, title: 'Instructions & Content', short: 'Content' },
-    { id: 4, title: 'Rules & Postback', short: 'Settings' },
+    { id: 4, title: 'Rules & Controls', short: 'Settings' },
 ];
 
 const INITIAL_FORM = {
@@ -37,7 +37,6 @@ const INITIAL_FORM = {
     priority: 1,
     events: [],
     backgroundImage: '',
-    advertiserPostbackUrl: '',
 };
 
 export default function OfferCreateModal({
@@ -107,7 +106,7 @@ export default function OfferCreateModal({
         if (step === 2) {
             const selectedEvents = (form.events || []).filter((e) => e.selected);
             if (selectedEvents.length === 0) {
-                showNotification('At least one milestone event must be selected', 'error');
+                showNotification('At least one event must be selected', 'error');
                 return false;
             }
             for (let i = 0; i < selectedEvents.length; i++) {

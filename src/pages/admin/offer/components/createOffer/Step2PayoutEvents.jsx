@@ -40,10 +40,10 @@ export default function Step2PayoutEvents({ form, onChange }) {
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                        Conversion Milestones & User Payouts
+                        Payout Summary
                     </h4>
                     <p className="text-[11px] text-slate-500">
-                        Set the reward payout for each user completion milestone.
+                        Set user reward for each event.
                     </p>
                 </div>
 
@@ -101,7 +101,7 @@ export default function Step2PayoutEvents({ form, onChange }) {
                                                     {String(ev.order || i + 1).padStart(2, '0')}
                                                 </span>
                                                 <p className="text-xs font-bold text-slate-900 truncate">
-                                                    {ev.eventName || `Milestone ${i + 1}`}
+                                                    {ev.eventName || `Event ${i + 1}`}
                                                 </p>
                                             </div>
 

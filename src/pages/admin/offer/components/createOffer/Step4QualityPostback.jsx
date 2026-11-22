@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlusIcon, CloseIcon, ShieldIcon, LinkIcon } from '../../../../../components/common/Icons';
+import { PlusIcon, CloseIcon, ShieldIcon } from '../../../../../components/common/Icons';
 
 export default function Step4QualityPostback({ form, onChange }) {
     const handleAddInput = () => {
@@ -25,41 +25,31 @@ export default function Step4QualityPostback({ form, onChange }) {
                 <div className="flex items-center gap-1.5">
                     <ShieldIcon size={14} className="text-slate-700" />
                     <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                        Quality & Visibility Controls
+                        Rules & Visibility
                     </h4>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                     {/* One UPI Limit */}
-                    <label className="flex items-start gap-3 p-3 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-slate-300 transition-colors">
+                    <label className="flex items-center gap-3 p-3 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-slate-300 transition-colors">
                         <input
                             type="checkbox"
                             checked={!!form.oneUpiOneTime}
                             onChange={(e) => onChange('oneUpiOneTime', e.target.checked)}
-                            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
+                            className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                         />
-                        <div>
-                            <span className="text-xs font-bold text-slate-900 block">One UPI per Completion</span>
-                            <span className="text-[11px] text-slate-500">
-                                Disallows duplicate claims using the same payment UPI ID.
-                            </span>
-                        </div>
+                        <span className="text-xs font-bold text-slate-900">Block Duplicate UPI</span>
                     </label>
 
                     {/* Show in Public App */}
-                    <label className="flex items-start gap-3 p-3 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-slate-300 transition-colors">
+                    <label className="flex items-center gap-3 p-3 rounded-lg bg-white border border-slate-200 cursor-pointer hover:border-slate-300 transition-colors">
                         <input
                             type="checkbox"
                             checked={!!form.offerDisplay}
                             onChange={(e) => onChange('offerDisplay', e.target.checked)}
-                            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
+                            className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
                         />
-                        <div>
-                            <span className="text-xs font-bold text-slate-900 block">Display in Telegram App</span>
-                            <span className="text-[11px] text-slate-500">
-                                When enabled, users can discover and complete this offer.
-                            </span>
-                        </div>
+                        <span className="text-xs font-bold text-slate-900">Show in App / Web</span>
                     </label>
                 </div>
             </div>
@@ -67,14 +57,9 @@ export default function Step4QualityPostback({ form, onChange }) {
             {/* 2. Jumper Traffic Redirection */}
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
-                    <div>
-                        <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                            Traffic Jumper & Rerouting
-                        </h4>
-                        <p className="text-[11px] text-slate-500">
-                            Optionally split or redirect traffic to an alternate deal URL.
-                        </p>
-                    </div>
+                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                        Traffic Jumper & Rerouting
+                    </h4>
 
                     <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-800">
                         <input
@@ -120,43 +105,12 @@ export default function Step4QualityPostback({ form, onChange }) {
                 )}
             </div>
 
-            {/* 3. S2S Postback / Reselling Callback */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-                <div className="flex items-center gap-1.5">
-                    <LinkIcon size={14} className="text-slate-700" />
-                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                        Advertiser S2S Postback & Callback
-                    </h4>
-                </div>
-
-                <div>
-                    <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">
-                        Callback Postback URL
-                    </label>
-                    <input
-                        type="text"
-                        value={form.advertiserPostbackUrl || ''}
-                        onChange={(e) => onChange('advertiserPostbackUrl', e.target.value)}
-                        placeholder="https://partner-network.com/postback?click_id={p1}&event={event_id}"
-                        className="w-full px-3.5 py-2 text-xs font-mono rounded-lg bg-white border border-slate-300 text-slate-900 placeholder-slate-400"
-                    />
-                    <p className="mt-1 text-[11px] text-slate-500 font-mono">
-                        Supported macros: &#123;click_id&#125;, &#123;p1&#125;–&#123;p6&#125;, &#123;gaid&#125;, &#123;source&#125;, &#123;event_id&#125;
-                    </p>
-                </div>
-            </div>
-
-            {/* 4. Custom User Input Fields */}
+            {/* 3. Custom User Input Fields */}
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
-                    <div>
-                        <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                            Custom User Information Fields
-                        </h4>
-                        <p className="text-[11px] text-slate-500">
-                            Ask user for extra data before submitting (e.g. Registered Mobile, Account ID).
-                        </p>
-                    </div>
+                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                        Custom User Fields
+                    </h4>
 
                     <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-800">
                         <input
