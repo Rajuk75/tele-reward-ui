@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getCampaignById } from '../../../../../services/AppService';
-import { ActivityIcon, TargetIcon, ShieldIcon } from '../../../../../components/common/Icons';
+import { ActivityIcon, ShieldIcon } from '../../../../../components/common/Icons';
 
 export default function Step2PayoutEvents({ form, onChange }) {
     const { data: campaignDetail } = useQuery({
@@ -71,14 +71,14 @@ export default function Step2PayoutEvents({ form, onChange }) {
             ) : (
                 <div className="space-y-3">
                     {events.map((ev, i) => {
-                        const campEvt = campaignDetail?.events?.find((e) => e._id === ev._id) || campaignDetail?.events?.[i];
+                        const campEvt = campaignDetail?.events?.find((e) => e._id === ev.campaignEventId);
                         const advPayout = campEvt?.advertiserPayout ?? 0;
                         const userPayoutNum = Number(ev.payout) || 0;
                         const eventMargin = advPayout - userPayoutNum;
 
                         return (
                             <div
-                                key={ev._id || i}
+                                key={ev.campaignEventId}
                                 className={`p-4 rounded-xl border transition-all ${
                                     ev.selected
                                         ? 'bg-white border-slate-300 shadow-2xs'
@@ -106,11 +106,6 @@ export default function Step2PayoutEvents({ form, onChange }) {
                                             </div>
 
                                             <div className="flex flex-wrap items-center gap-2 mt-1.5 text-[11px] text-slate-500">
-                                                <span className="inline-flex items-center gap-1 font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">
-                                                    <TargetIcon size={11} />
-                                                    {campEvt?.objective || 'CPA'}
-                                                </span>
-
                                                 {campEvt?.cap && (
                                                     <span className="inline-flex items-center gap-1 font-medium text-slate-600">
                                                         <ActivityIcon size={11} />

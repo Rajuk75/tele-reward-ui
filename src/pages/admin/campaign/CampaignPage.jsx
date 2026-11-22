@@ -12,7 +12,6 @@ import CampaignToolbar from './components/CampaignToolbar';
 import CampaignExpandedRow from './components/CampaignExpandedRow';
 import DeleteWarningModal from './components/DeleteWarningModal';
 import CampaignCreateModal from './components/CampaignCreateModal';
-import CampaignEditModal from './components/CampaignEditModal';
 
 // Reusable DataTable
 import DataTable from '../../../components/common/table/DataTable';
@@ -280,18 +279,12 @@ export default function CampaignPage() {
                 />
 
                 {/* Modals */}
-                {actions.editId && (
-                    <CampaignEditModal
-                        campaignId={actions.editId}
-                        onClose={() => { actions.setEditId(null); campaignsState.refetch(); }}
-                    />
-                )}
-
                 {modal === 'create-campaign' && (
                     <CampaignCreateModal
                         currentStep={step}
                         onStepChange={setStep}
-                        onClose={() => { closeModal(); campaignsState.refetch(); }}
+                        onCreate={campaignsState.handleCreate}
+                        onClose={closeModal}
                     />
                 )}
 

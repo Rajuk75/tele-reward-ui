@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getAvailableCampaigns, getCampaignById } from '../../../../../services/AppService';
 import { LayersIcon } from '../../../../../components/common/Icons';
 
-export default function Step1CampaignInfo({ form, onChange, prefillCampaignId }) {
+export default function Step1CampaignInfo({ form, onChange, prefillCampaignId, onCampaignLoaded }) {
     const { data: availableData, isLoading: loadingCampaigns } = useQuery({
         queryKey: ['campaigns-available'],
         queryFn: () => getAvailableCampaigns().then((r) => r.data?.data?.campaigns ?? []),
@@ -20,32 +20,9 @@ export default function Step1CampaignInfo({ form, onChange, prefillCampaignId })
         enabled: !!form.campaignId,
     });
 
-    // When campaign details load, auto-populate category, model, name (if blank), and events
     useEffect(() => {
-        if (campaignDetail) {
-            onChange('category', campaignDetail.category || '');
-            onChange('model', campaignDetail.model || '');
-            if (!form.offerName) {
-                onChange('offerName', campaignDetail.name || '');
-            }
-            if (!form.comment) {
-                onChange('comment', campaignDetail.description ? campaignDetail.description.slice(0, 80) : 'Complete task to receive reward');
-            }
-            if (Array.isArray(campaignDetail.events) && campaignDetail.events.length > 0) {
-                onChange(
-                    'events',
-                    campaignDetail.events.map((e) => ({
-                        _id: e._id,
-                        eventName: e.name,
-                        payout: '',
-                        order: e.order,
-                        steps: e.steps || '',
-                        selected: true,
-                    }))
-                );
-            }
-        }
-    }, [campaignDetail]);
+        if (campaignDetail) onCampaignLoaded(campaignDetail);
+    }, [campaignDetail, onCampaignLoaded]);
 
     return (
         <div className="space-y-5">

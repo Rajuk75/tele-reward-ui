@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getCampaigns, deleteCampaign } from '../../../../services/AppService';
+import { useQueryClient } from '@tanstack/react-query';
+import { getCampaigns, createCampaign, deleteCampaign } from '../../../../services/AppService';
 import { useQueryState } from '../../../../hooks/useQueryState';
 import { showNotification } from '../../../../components/Toastify/Toast';
 
@@ -9,6 +10,7 @@ export const CAMPAIGN_CATEGORIES = [
 ];
 
 export function useCampaigns() {
+    const queryClient = useQueryClient();
     const { query, setQuery } = useQueryState();
 
     const page = Number(query.page) || 1;
@@ -75,6 +77,15 @@ export function useCampaigns() {
         }
     };
 
+    const handleCreate = async (payload) => {
+        const response = await createCampaign(payload);
+        await Promise.all([
+            fetchCampaigns(),
+            queryClient.invalidateQueries({ queryKey: ['campaigns-available'] }),
+        ]);
+        return response.data.data;
+    };
+
     const toggleRow = (id) => setExpandedId((prev) => (prev === id ? null : id));
 
     const clearFilters = () => {
@@ -113,5 +124,6 @@ export function useCampaigns() {
         setDeleteTarget,
         isDeleting,
         handleDelete,
+        handleCreate,
     };
 }

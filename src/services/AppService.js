@@ -119,7 +119,7 @@ export async function createCampaign(data) {
     showNotification(response.data?.message || 'Campaign created successfully', 'success');
     return response;
   } catch (error) {
-    showNotification(error.message, 'error');
+    showNotification(error.message || 'Failed to create campaign', 'error');
     throw error;
   }
 }

@@ -67,7 +67,26 @@ export default function OfferCreateModal({
     }, []);
 
     const handleChange = useCallback((field, value) => {
-        setForm((prev) => ({ ...prev, [field]: value }));
+        setForm(prev => field === 'campaignId' && value !== prev.campaignId
+            ? { ...prev, campaignId: value, events: [], offerName: '', comment: '', category: '', model: '' }
+            : { ...prev, [field]: value });
+    }, []);
+
+    const loadCampaignEvents = useCallback(campaign => {
+        setForm(prev => {
+            if (prev.campaignId !== campaign._id) return prev;
+            const previous = new Map(prev.events.map(row => [row.campaignEventId, row]));
+            return {
+                ...prev, category: campaign.category, model: campaign.model,
+                offerName: prev.offerName || campaign.name,
+                comment: prev.comment || campaign.description?.slice(0, 80) || 'Complete task to receive reward',
+                events: campaign.events.filter(event => event.status === 'active' && !event.isDeleted).map(event => ({
+                    campaignEventId: event._id, eventName: event.name, order: event.order, steps: event.steps,
+                    payout: previous.get(event._id)?.payout ?? '',
+                    selected: previous.get(event._id)?.selected ?? true,
+                })),
+            };
+        });
     }, []);
 
     const validateStep = (step) => {
@@ -124,6 +143,7 @@ export default function OfferCreateModal({
         mutationFn: (payload) => createOffer(payload),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['offers'] });
+            queryClient.invalidateQueries({ queryKey: ['campaigns-available'] });
             handleClose();
         },
     });
@@ -132,21 +152,25 @@ export default function OfferCreateModal({
         if (e) e.preventDefault();
         if (!validateStep(1) || !validateStep(2) || !validateStep(3)) return;
 
+        const { events: rawEvents, ...offerFields } = form;
+
         const payload = {
-            ...form,
-            events: (form.events || [])
+            offer: {
+                ...offerFields,
+                inputs: form.inputEnabled
+                    ? (form.inputs || [])
+                          .filter((inp) => (inp.label || '').trim())
+                          .map((inp, idx) => ({ ...inp, order: idx + 1 }))
+                    : [],
+                jumperRatio: form.jumperEnabled && form.jumperRatio ? Number(form.jumperRatio) : null,
+                jumperUrl: form.jumperEnabled && form.jumperUrl ? form.jumperUrl : null,
+            },
+            events: (rawEvents || [])
                 .filter((ev) => ev.selected)
                 .map((ev) => ({
-                    campaignEventId: ev._id,
+                    campaignEventId: ev.campaignEventId,
                     userPayout: Number(ev.payout),
                 })),
-            inputs: form.inputEnabled
-                ? (form.inputs || [])
-                      .filter((inp) => (inp.label || '').trim())
-                      .map((inp, idx) => ({ ...inp, order: idx + 1 }))
-                : [],
-            jumperRatio: form.jumperEnabled && form.jumperRatio ? Number(form.jumperRatio) : null,
-            jumperUrl: form.jumperEnabled && form.jumperUrl ? form.jumperUrl : null,
         };
 
         mutation.mutate(payload);
@@ -225,7 +249,7 @@ export default function OfferCreateModal({
                 {/* Step Body */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-4">
                     {currentStep === 1 && (
-                        <Step1CampaignInfo
+                        <Step1CampaignInfo onCampaignLoaded={loadCampaignEvents}
                             form={form}
                             onChange={handleChange}
                             prefillCampaignId={prefillCampaignId}

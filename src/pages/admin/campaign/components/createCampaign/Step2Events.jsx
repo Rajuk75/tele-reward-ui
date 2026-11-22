@@ -1,8 +1,6 @@
 import React from 'react';
 import { FiPlus, FiTrash2 } from 'react-icons/fi';
 
-const OBJECTIVES = ['CPI', 'CPA', 'CPL', 'CPR', 'CPS', 'CPD', 'CPG', 'CPRT', 'CPT', 'CPV'];
-
 export default function Step2Events({ form, onChange }) {
     const events = form.events || [];
 
@@ -16,7 +14,7 @@ export default function Step2Events({ form, onChange }) {
         const nextOrder = events.length + 1;
         onChange('events', [
             ...events,
-            { name: '', objective: 'CPI', payout: '', order: nextOrder }
+            { name: '', cap: 1000, advertiserPayout: '', order: nextOrder }
         ]);
     };
 
@@ -26,7 +24,7 @@ export default function Step2Events({ form, onChange }) {
         onChange('events', filtered);
     };
 
-    const totalPayout = events.reduce((sum, e) => sum + (Number(e.payout) || 0), 0);
+    const totalPayout = events.reduce((sum, e) => sum + (Number(e.advertiserPayout) || 0), 0);
 
     return (
         <div className="space-y-4 animate-in fade-in duration-200">
@@ -62,7 +60,7 @@ export default function Step2Events({ form, onChange }) {
                             )}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="flex flex-nowrap items-end gap-3 overflow-x-auto pb-1 [&>*]:min-w-36 [&>*]:flex-1">
                             {/* Event Title */}
                             <div>
                                 <label className="mb-1.5 block text-xs font-medium text-slate-700">
@@ -85,23 +83,12 @@ export default function Step2Events({ form, onChange }) {
                                     className="mt-1.5 h-10 w-full rounded-lg border border-slate-200 px-3" />
                             </label>
 
-                            {/* Objective / Model */}
-                            <div>
-                                <label className="mb-1.5 block text-xs font-medium text-slate-700">
-                                    Objective
-                                </label>
-                                <select
-                                    value={ev.objective}
-                                    onChange={(e) => updateEvent(idx, 'objective', e.target.value)}
-                                    className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100"
-                                >
-                                    {OBJECTIVES.map((obj) => (
-                                        <option key={obj} value={obj}>
-                                            {obj}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                            <label className="text-xs font-medium text-slate-700">
+                                Event cap
+                                <input type="number" required min="1" step="1" value={ev.cap}
+                                    onChange={e => updateEvent(idx, 'cap', e.target.value)}
+                                    className="mt-1.5 h-10 w-full rounded-lg border border-slate-200 px-3" />
+                            </label>
 
                             {/* Advertiser Payout (₹) */}
                             <div>
@@ -113,8 +100,8 @@ export default function Step2Events({ form, onChange }) {
                                     min="0"
                                     step="0.01"
                                     required
-                                    value={ev.payout}
-                                    onChange={(e) => updateEvent(idx, 'payout', e.target.value)}
+                                    value={ev.advertiserPayout}
+                                    onChange={(e) => updateEvent(idx, 'advertiserPayout', e.target.value)}
                                     placeholder="150"
                                     className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100"
                                 />
@@ -125,7 +112,7 @@ export default function Step2Events({ form, onChange }) {
             </div>
 
             {/* Add More Events */}
-            {events.length < 5 && (
+            {events.length < 6 && (
                 <button
                     type="button"
                     onClick={addEvent}

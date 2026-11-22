@@ -88,6 +88,13 @@ export default function Step1Basic({ form, onChange }) {
                 </div>
             </div>
 
+            <label className="block text-xs font-medium text-slate-700">
+                Campaign image URL *
+                <input type="url" required value={form.imageUrl}
+                    onChange={e => onChange('imageUrl', e.target.value)}
+                    className="mt-1.5 h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
+            </label>
+
             {/* Destination Tracking URL */}
             <div className="space-y-2 border-t border-slate-100 pt-5">
                 <label className="block text-xs font-medium text-slate-700">
