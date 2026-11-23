@@ -22,7 +22,7 @@ export default function DataTable({
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm border-collapse min-w-[750px]">
                     <thead>
-                        <tr className="border-b border-slate-200 bg-slate-50/75 text-[11px] font-semibold uppercase tracking-wider text-slate-500 select-none">
+                        <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-700 select-none">
                             {columns.map((col, i) => (
                                 <th
                                     key={col.key || i}
@@ -39,21 +39,21 @@ export default function DataTable({
                             ))}
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                    <tbody className="divide-y divide-slate-100 text-slate-800">
                         {isLoading ? (
                             Array.from({ length: 6 }).map((_, rIdx) => (
                                 <tr key={`skeleton-${rIdx}`} className="animate-pulse">
                                     {columns.map((col, cIdx) => (
                                         <td key={`skel-col-${cIdx}`} className="px-4 py-3.5">
-                                            <div className="h-4 bg-slate-100 rounded-md w-3/4"></div>
+                                            <div className="h-4 bg-slate-200 rounded-md w-3/4"></div>
                                         </td>
                                     ))}
                                 </tr>
                             ))
                         ) : data.length === 0 ? (
                             <tr>
-                                <td colSpan={columns.length} className="px-4 py-16 text-center text-slate-400">
-                                    <p className="text-sm font-medium">{emptyMessage}</p>
+                                <td colSpan={columns.length} className="px-4 py-16 text-center text-slate-600">
+                                    <p className="text-sm font-semibold">{emptyMessage}</p>
                                 </td>
                             </tr>
                         ) : (

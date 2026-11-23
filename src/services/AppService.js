@@ -428,6 +428,93 @@ export async function rejectProof(trackingId, eventId, adminNote, reuploadAllowe
   }
 }
 
+// ── Partners (Manage Partners / Dropdown) ───────────────────────────────────
+
+export async function getAllPartners(params = {}) {
+  try {
+    return await callApi({
+      endpoint: `admin/get-all-partners${buildQuery(params)}`,
+      method: 'GET'
+    });
+  } catch (error) {
+    showNotification(error.message, 'error');
+    throw error;
+  }
+}
+
+export async function createPartner(data) {
+  try {
+    const response = await callApi({
+      endpoint: 'admin/create-new-partner',
+      method: 'POST',
+      body: data
+    });
+    showNotification(response.data?.message || 'Partner registered successfully', 'success');
+    return response;
+  } catch (error) {
+    showNotification(error.message, 'error');
+    throw error;
+  }
+}
+
+// ── Referrals (Manage Referrers) ──────────────────────────────────────────────
+
+export async function getReferrals(params = {}) {
+  try {
+    return await callApi({
+      endpoint: `admin/get-all-referrals${buildQuery(params)}`,
+      method: 'GET'
+    });
+  } catch (error) {
+    showNotification(error.message, 'error');
+    throw error;
+  }
+}
+
+export async function createReferral(data) {
+  try {
+    const response = await callApi({
+      endpoint: 'admin/create-new-referral-link',
+      method: 'POST',
+      body: data
+    });
+    showNotification(response.data?.message || 'Referral link created successfully', 'success');
+    return response;
+  } catch (error) {
+    showNotification(error.message, 'error');
+    throw error;
+  }
+}
+
+export async function updateReferral(id, data) {
+  try {
+    const response = await callApi({
+      endpoint: `admin/referral/${id}/update`,
+      method: 'PUT',
+      body: data
+    });
+    showNotification(response.data?.message || 'Referral link updated successfully', 'success');
+    return response;
+  } catch (error) {
+    showNotification(error.message, 'error');
+    throw error;
+  }
+}
+
+export async function deleteReferral(id) {
+  try {
+    const response = await callApi({
+      endpoint: `admin/referral/${id}/delete`,
+      method: 'DELETE'
+    });
+    showNotification(response.data?.message || 'Referral link deleted', 'success');
+    return response;
+  } catch (error) {
+    showNotification(error.message, 'error');
+    throw error;
+  }
+}
+
 // ── Postback Logs ─────────────────────────────────────────────────────────────
 
 export async function getPostbackLogs(params = {}) {

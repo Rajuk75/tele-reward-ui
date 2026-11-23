@@ -39,6 +39,7 @@ const CampaignPage        = lazyWithErrorHandling(() => import("../pages/admin/c
 const OfferPage           = lazyWithErrorHandling(() => import("../pages/admin/offer/OfferPage"));
 
 const ConversionList      = lazyWithErrorHandling(() => import("../pages/admin/conversion/ConversionList"));
+const ReferralList        = lazyWithErrorHandling(() => import("../pages/admin/referral/ReferralList"));
 const PostbackList        = lazyWithErrorHandling(() => import("../pages/admin/postback/PostbackList"));
 
 const UserList            = lazyWithErrorHandling(() => import("../pages/admin/user/UserList"));
@@ -80,6 +81,7 @@ const AppRoutes = () => {
                         <Route path="campaigns"                        element={<CampaignPage />} />
 
                         <Route path="offers"                           element={<OfferPage />} />
+                        <Route path="referrals"                        element={<ReferralList />} />
 
                         <Route path="conversions"                     element={<ConversionList />} />
                         <Route path="postbacks"                       element={<PostbackList />} />
