@@ -515,6 +515,28 @@ export async function deleteReferral(id) {
   }
 }
 
+export async function verifyUpiId(vpa) {
+  try {
+    return await callApi({
+      endpoint: `payment-methods/verify-upi${buildQuery({ vpa })}`,
+      method: 'GET'
+    });
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function verifyIfscCode(ifscCode) {
+  try {
+    return await callApi({
+      endpoint: `payment-methods/verify-ifsc${buildQuery({ ifscCode })}`,
+      method: 'GET'
+    });
+  } catch (error) {
+    throw error;
+  }
+}
+
 // ── Postback Logs ─────────────────────────────────────────────────────────────
 
 export async function getPostbackLogs(params = {}) {

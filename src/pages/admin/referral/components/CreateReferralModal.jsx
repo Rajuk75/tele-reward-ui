@@ -1,6 +1,27 @@
 import React, { useState } from 'react';
-import { FiX, FiLink, FiPercent, FiCreditCard, FiUserPlus, FiLayers, FiUser } from 'react-icons/fi';
+import { 
+    FiX, 
+    FiLink, 
+    FiPercent, 
+    FiUserPlus, 
+    FiLayers, 
+    FiUser
+} from 'react-icons/fi';
 import { showNotification } from '../../../../components/Toastify/Toast';
+
+// Subcomponents for Payment Methods
+import UpiPaymentFields from './payment/UpiPaymentFields';
+import BankPaymentFields from './payment/BankPaymentFields';
+
+const INITIAL_FORM_STATE = {
+    partnerId: '',
+    offerId: '',
+    referrerType: 'UPI',
+    referrerAccount: '',
+    referrerIfsc: '',
+    referrerHolderName: '',
+    referrerPercent: 30,
+};
 
 export default function CreateReferralModal({
     isOpen,
@@ -13,17 +34,19 @@ export default function CreateReferralModal({
     isLoadingOffers = false,
     onOpenPartnerModal,
 }) {
-    const [form, setForm] = useState({
-        partnerId: '',
-        offerId: '',
-        referrerType: 'UPI',
-        referrerAccount: '',
-        referrerIfsc: '',
-        referrerHolderName: '',
-        referrerPercent: 30,
-    });
+    const [form, setForm] = useState(INITIAL_FORM_STATE);
 
     if (!isOpen) return null;
+
+    const handlePaymentTypeChange = (type) => {
+        setForm((prev) => ({
+            ...prev,
+            referrerType: type,
+            referrerAccount: '',
+            referrerIfsc: '',
+            referrerHolderName: '',
+        }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -38,60 +61,96 @@ export default function CreateReferralModal({
             return;
         }
 
-        const trimmedAccount = form.referrerAccount.trim();
-        if (!trimmedAccount) {
-            showNotification('Please enter the payment account details', 'warning');
-            return;
-        }
+        // Validate and build payment payload based on selected method
+        let paymentData = {};
 
-        if (form.referrerType === 'UPI' && !/^[\w.-]+@[a-z\d.-]+$/i.test(trimmedAccount)) {
-            showNotification('Please enter a valid UPI ID (e.g. user@bank)', 'warning');
-            return;
-        }
-
-        if (form.referrerType === 'PAYTM' && !/^\d{10}$/.test(trimmedAccount)) {
-            showNotification('Please enter a valid 10-digit Paytm mobile number', 'warning');
-            return;
-        }
-
-        if (form.referrerType === 'BANK') {
-            if (!/^\d{9,18}$/.test(trimmedAccount)) {
-                showNotification('Please enter a valid bank account number (9-18 digits)', 'warning');
-                return;
+        switch (form.referrerType) {
+            case 'UPI': {
+                const acc = form.referrerAccount?.trim();
+                if (!acc) {
+                    showNotification('Please enter partner UPI ID', 'warning');
+                    return;
+                }
+                if (!/^[\w.-]+@[a-z\d.-]+$/i.test(acc)) {
+                    showNotification('Please enter a valid UPI address (e.g. name@okhdfcbank)', 'warning');
+                    return;
+                }
+                paymentData = {
+                    referrerType: 'UPI',
+                    referrerAccount: acc,
+                };
+                break;
             }
-            if (!form.referrerIfsc?.trim() || !/^[A-Z]{4}0[A-Z0-9]{6}$/i.test(form.referrerIfsc.trim())) {
-                showNotification('Please enter a valid 11-character IFSC code', 'warning');
-                return;
+
+            case 'BANK': {
+                const acc = form.referrerAccount?.trim();
+                if (!acc) {
+                    showNotification('Please enter bank account number', 'warning');
+                    return;
+                }
+                if (!/^\d{9,18}$/.test(acc)) {
+                    showNotification('Please enter a valid 9 to 18 digit bank account number', 'warning');
+                    return;
+                }
+                const ifsc = form.referrerIfsc?.trim();
+                if (!ifsc) {
+                    showNotification('Please enter IFSC code', 'warning');
+                    return;
+                }
+                if (!/^[A-Z]{4}0[A-Z0-9]{6}$/i.test(ifsc)) {
+                    showNotification('Please enter a valid 11-character IFSC code (e.g. SBIN0001234)', 'warning');
+                    return;
+                }
+                paymentData = {
+                    referrerType: 'BANK',
+                    referrerAccount: acc,
+                    referrerIfsc: ifsc.toUpperCase(),
+                    referrerHolderName: form.referrerHolderName?.trim() || undefined,
+                };
+                break;
             }
+
+            default:
+                showNotification('Invalid payout method selected', 'warning');
+                return;
         }
 
         const payload = {
             partnerId: form.partnerId,
             offerId: form.offerId,
-            referrerType: form.referrerType,
-            referrerAccount: trimmedAccount,
             referrerPercent: Number(form.referrerPercent),
-            ...(form.referrerType === 'BANK' && {
-                referrerIfsc: form.referrerIfsc.trim().toUpperCase(),
-                referrerHolderName: form.referrerHolderName.trim() || undefined,
-            }),
+            ...paymentData,
         };
 
         const success = await onSubmit(payload);
         if (success) {
-            setForm({
-                partnerId: '',
-                offerId: '',
-                referrerType: 'UPI',
-                referrerAccount: '',
-                referrerIfsc: '',
-                referrerHolderName: '',
-                referrerPercent: 30,
-            });
+            setForm(INITIAL_FORM_STATE);
         }
     };
 
     const refereePercent = Math.max(0, 100 - Number(form.referrerPercent || 0));
+
+    const renderPaymentFields = () => {
+        switch (form.referrerType) {
+            case 'BANK':
+                return (
+                    <BankPaymentFields
+                        account={form.referrerAccount}
+                        ifsc={form.referrerIfsc}
+                        holderName={form.referrerHolderName}
+                        onChange={(field, val) => setForm((prev) => ({ ...prev, [field]: val }))}
+                    />
+                );
+            case 'UPI':
+            default:
+                return (
+                    <UpiPaymentFields
+                        value={form.referrerAccount}
+                        onChange={(val) => setForm((prev) => ({ ...prev, referrerAccount: val }))}
+                    />
+                );
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
@@ -104,14 +163,14 @@ export default function CreateReferralModal({
                         </div>
                         <div>
                             <h3 className="text-sm font-bold text-slate-900">Create Referral Link</h3>
-                            <p className="text-xs font-medium text-slate-600">Generate an affiliate tracking URL tied to a partner</p>
+                            <p className="text-xs font-normal text-slate-500">Generate an affiliate tracking URL tied to a partner</p>
                         </div>
                     </div>
                     <button
                         type="button"
                         onClick={onClose}
                         disabled={isSubmitting}
-                        className="text-slate-500 hover:text-slate-800 rounded-lg p-1.5 hover:bg-slate-100 transition-colors cursor-pointer"
+                        className="text-slate-400 hover:text-slate-600 rounded-lg p-1.5 hover:bg-slate-100 transition-colors cursor-pointer"
                     >
                         <FiX size={16} />
                     </button>
@@ -122,7 +181,7 @@ export default function CreateReferralModal({
                     {/* Partner Dropdown */}
                     <div>
                         <div className="flex items-center justify-between mb-1.5">
-                            <label className="text-xs font-bold text-slate-800">
+                            <label className="text-xs font-semibold text-slate-700">
                                 Affiliate Partner <span className="text-rose-500">*</span>
                             </label>
                             <button
@@ -131,19 +190,19 @@ export default function CreateReferralModal({
                                     onClose();
                                     onOpenPartnerModal();
                                 }}
-                                className="text-[11px] font-bold text-blue-700 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
+                                className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
                             >
                                 <FiUserPlus size={12} />
                                 <span>+ New Partner</span>
                             </button>
                         </div>
                         <div className="relative">
-                            <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+                            <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                             <select
                                 required
                                 value={form.partnerId}
                                 onChange={(e) => setForm({ ...form, partnerId: e.target.value })}
-                                className="w-full pl-9 pr-3.5 py-2 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-slate-800 transition-colors cursor-pointer"
+                                className="w-full pl-9 pr-3.5 py-2 text-xs font-medium rounded-lg bg-white border border-slate-200 text-slate-800 focus:outline-none focus:border-slate-400 transition-colors cursor-pointer"
                             >
                                 <option value="">Select a registered partner...</option>
                                 {partners.map((p) => (
@@ -154,7 +213,7 @@ export default function CreateReferralModal({
                             </select>
                         </div>
                         {partners.length === 0 && !isLoadingPartners && (
-                            <p className="text-[11px] font-semibold text-amber-700 mt-1">
+                            <p className="text-[11px] font-medium text-amber-600 mt-1">
                                 No active partners found. Click "+ New Partner" above to register one first.
                             </p>
                         )}
@@ -162,16 +221,16 @@ export default function CreateReferralModal({
 
                     {/* Target Offer Dropdown */}
                     <div>
-                        <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                             Target Offer / Campaign <span className="text-rose-500">*</span>
                         </label>
                         <div className="relative">
-                            <FiLayers className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+                            <FiLayers className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                             <select
                                 required
                                 value={form.offerId}
                                 onChange={(e) => setForm({ ...form, offerId: e.target.value })}
-                                className="w-full pl-9 pr-3.5 py-2 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-slate-800 transition-colors cursor-pointer"
+                                className="w-full pl-9 pr-3.5 py-2 text-xs font-medium rounded-lg bg-white border border-slate-200 text-slate-800 focus:outline-none focus:border-slate-400 transition-colors cursor-pointer"
                             >
                                 <option value="">Select an active offer...</option>
                                 {offers.map((o) => (
@@ -184,13 +243,13 @@ export default function CreateReferralModal({
                     </div>
 
                     {/* Commission Split */}
-                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-300 space-y-2">
-                        <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                        <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
                             <span className="flex items-center gap-1.5">
-                                <FiPercent size={14} className="text-slate-700" />
+                                <FiPercent size={14} className="text-slate-500" />
                                 <span>Commission Split</span>
                             </span>
-                            <span className="font-mono text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-300 text-[11px] font-bold">
+                            <span className="font-mono text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-200 text-[11px] font-semibold">
                                 {form.referrerPercent}% Partner / {refereePercent}% User
                             </span>
                         </div>
@@ -203,81 +262,56 @@ export default function CreateReferralModal({
                             onChange={(e) => setForm({ ...form, referrerPercent: Number(e.target.value) })}
                             className="w-full accent-slate-900 cursor-pointer"
                         />
-                        <div className="flex justify-between text-[11px] font-semibold text-slate-600">
+                        <div className="flex justify-between text-[11px] font-medium text-slate-500">
                             <span>0% (All to user)</span>
-                            <span className="font-bold text-slate-900">Partner: {form.referrerPercent}%</span>
+                            <span className="font-semibold text-slate-700">Partner: {form.referrerPercent}%</span>
                             <span>100% (All to partner)</span>
                         </div>
                     </div>
 
                     {/* Payment Account Details */}
                     <div>
-                        <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                             Partner Payout Method & Account <span className="text-rose-500">*</span>
                         </label>
-                        <div className="grid grid-cols-3 gap-2 mb-2.5">
-                            {['UPI', 'PAYTM', 'BANK'].map((type) => (
-                                <button
-                                    key={type}
-                                    type="button"
-                                    onClick={() => setForm({ ...form, referrerType: type, referrerAccount: '' })}
-                                    className={`py-2 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
-                                        form.referrerType === type
-                                            ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
-                                            : 'bg-white text-slate-800 border-slate-300 hover:bg-slate-100'
-                                    }`}
-                                >
-                                    {type}
-                                </button>
-                            ))}
-                        </div>
 
-                        <div className="relative">
-                            <FiCreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
-                            <input
-                                type="text"
-                                required
-                                value={form.referrerAccount}
-                                onChange={(e) => setForm({ ...form, referrerAccount: e.target.value })}
-                                placeholder={
+                        {/* 2-Way Payment Method Switch */}
+                        <div className="grid grid-cols-2 gap-2 mb-2.5">
+                            <button
+                                type="button"
+                                onClick={() => handlePaymentTypeChange('UPI')}
+                                className={`py-2 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
                                     form.referrerType === 'UPI'
-                                        ? 'username@bank or mobile@upi'
-                                        : form.referrerType === 'PAYTM'
-                                        ? '10-digit Paytm mobile number'
-                                        : 'Bank Account Number'
-                                }
-                                className="w-full pl-9 pr-3.5 py-2 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-slate-800 focus:ring-1 focus:ring-slate-800 transition-colors font-mono"
-                            />
+                                        ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                }`}
+                            >
+                                UPI
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handlePaymentTypeChange('BANK')}
+                                className={`py-2 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
+                                    form.referrerType === 'BANK'
+                                        ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                }`}
+                            >
+                                Bank
+                            </button>
                         </div>
 
-                        {form.referrerType === 'BANK' && (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
-                                <input
-                                    type="text"
-                                    required
-                                    value={form.referrerIfsc}
-                                    onChange={(e) => setForm({ ...form, referrerIfsc: e.target.value.toUpperCase() })}
-                                    placeholder="IFSC Code (e.g. SBIN0001234)"
-                                    className="w-full px-3 py-2 text-xs font-bold rounded-lg bg-white border border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-slate-800 uppercase font-mono"
-                                />
-                                <input
-                                    type="text"
-                                    value={form.referrerHolderName}
-                                    onChange={(e) => setForm({ ...form, referrerHolderName: e.target.value })}
-                                    placeholder="Account Holder Name (Optional)"
-                                    className="w-full px-3 py-2 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-slate-800"
-                                />
-                            </div>
-                        )}
+                        {/* Payment Fields (Switch Case) */}
+                        {renderPaymentFields()}
                     </div>
 
                     {/* Modal Footer */}
-                    <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
+                    <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
                         <button
                             type="button"
                             onClick={onClose}
                             disabled={isSubmitting}
-                            className="px-4 py-2 text-xs font-bold rounded-lg bg-white border border-slate-300 text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+                            className="px-4 py-2 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
                         >
                             Cancel
                         </button>

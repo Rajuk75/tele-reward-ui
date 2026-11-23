@@ -105,7 +105,49 @@ export default function Step4QualityPostback({ form, onChange }) {
                 )}
             </div>
 
-            {/* 3. Custom User Input Fields */}
+            {/* 3. Lucky Spin Wheel Config */}
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🎡 Lucky Spin & Win Bonus</span>
+                    </h4>
+
+                    <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-800">
+                        <input
+                            type="checkbox"
+                            checked={!!form.spinEnabled}
+                            onChange={(e) => onChange('spinEnabled', e.target.checked)}
+                            className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
+                        />
+                        <span>Enable Spin Wheel</span>
+                    </label>
+                </div>
+
+                {form.spinEnabled && (
+                    <div className="pt-1 space-y-2">
+                        <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                            Bonus Slices Amounts (₹, comma-separated)
+                        </label>
+                        <input
+                            type="text"
+                            value={form.spinSlicesText ?? '5, 10, 15, 20, 25'}
+                            onChange={(e) => {
+                                const txt = e.target.value;
+                                onChange('spinSlicesText', txt);
+                                const parsed = txt.split(',').map(s => Number(s.trim())).filter(n => !isNaN(n) && n > 0);
+                                onChange('spinSlices', parsed.length ? parsed : [5, 10, 15, 20, 25]);
+                            }}
+                            placeholder="e.g. 5, 10, 15, 20, 25"
+                            className="w-full px-3 py-2 text-xs font-medium rounded-lg bg-white border border-slate-300 text-slate-900 font-mono"
+                        />
+                        <p className="text-[11px] font-medium text-slate-500">
+                            Users will see these reward amounts on the lucky wheel slices when starting this offer.
+                        </p>
+                    </div>
+                )}
+            </div>
+
+            {/* 4. Custom User Input Fields */}
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
                     <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">

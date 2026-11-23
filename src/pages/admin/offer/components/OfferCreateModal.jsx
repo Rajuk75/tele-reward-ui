@@ -32,6 +32,9 @@ const INITIAL_FORM = {
     jumperEnabled: false,
     jumperRatio: '',
     jumperUrl: '',
+    spinEnabled: false,
+    spinSlicesText: '5, 10, 15, 20, 25',
+    spinSlices: [5, 10, 15, 20, 25],
     inputEnabled: false,
     inputs: [{ label: '', type: 'text', order: 1 }],
     priority: 1,
@@ -156,6 +159,10 @@ export default function OfferCreateModal({
         const payload = {
             offer: {
                 ...offerFields,
+                spinSettings: {
+                    enabled: !!form.spinEnabled,
+                    slices: form.spinSlices && form.spinSlices.length ? form.spinSlices : [5, 10, 15, 20, 25]
+                },
                 inputs: form.inputEnabled
                     ? (form.inputs || [])
                           .filter((inp) => (inp.label || '').trim())
