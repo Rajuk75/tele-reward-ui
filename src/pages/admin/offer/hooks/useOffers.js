@@ -24,6 +24,7 @@ export function useOffers() {
 
     // Action states
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [detailTarget, setDetailTarget] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
@@ -136,6 +137,8 @@ export function useOffers() {
         setSelectedOffer,
         clearFilters,
         // Action states & handlers
+        detailTarget,
+        setDetailTarget,
         deleteTarget,
         setDeleteTarget,
         isDeleting,

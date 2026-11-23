@@ -18,6 +18,7 @@ import OfferStats from './components/OfferStats';
 import OfferToolbar from './components/OfferToolbar';
 import OfferCreateModal from './components/OfferCreateModal';
 import OfferExpandedRow from './components/OfferExpandedRow';
+import OfferDetailsModal from './components/OfferDetailsModal';
 import DeleteOfferModal from './components/DeleteOfferModal';
 
 // Reusable DataTable
@@ -76,7 +77,7 @@ function StatusPill({ status, isActive }) {
     );
 }
 
-function OfferActionMenu({ offer, actions, onExpand }) {
+function OfferActionMenu({ offer, actions }) {
     return (
         <ActionDropdown>
             {({ close }) => (
@@ -85,7 +86,7 @@ function OfferActionMenu({ offer, actions, onExpand }) {
                         type="button"
                         onClick={() => {
                             close();
-                            onExpand();
+                            actions.setDetailTarget(offer);
                         }}
                         className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 flex items-center gap-2 cursor-pointer transition-colors"
                     >
@@ -278,7 +279,6 @@ export default function OfferPage() {
                 <OfferActionMenu
                     offer={o}
                     actions={actions}
-                    onExpand={() => handleRowClick(o._id)}
                 />
             ),
         },
@@ -348,6 +348,14 @@ export default function OfferPage() {
             </div>
 
             {/* Create Wizard Modal */}
+            {actions.detailTarget && (
+                <OfferDetailsModal
+                    key={actions.detailTarget._id}
+                    offer={actions.detailTarget}
+                    onClose={() => actions.setDetailTarget(null)}
+                />
+            )}
+
             {modal === 'create-offer' && (
                 <OfferCreateModal
                     onClose={() => { closeModal(); offersState.refetch(); }}
