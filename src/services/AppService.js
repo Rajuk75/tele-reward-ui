@@ -550,3 +550,31 @@ export async function getPostbackLogs(params = {}) {
     throw error;
   }
 }
+
+// ── Payouts ──────────────────────────────────────────────────────────────────
+
+export async function getPayouts(params = {}) {
+  try {
+    return await callApi({
+      endpoint: `admin/payouts${buildQuery(params)}`,
+      method: 'GET'
+    });
+  } catch (error) {
+    showNotification(error.message, 'error');
+    throw error;
+  }
+}
+
+export async function sendPayout(id) {
+  try {
+    const response = await callApi({
+      endpoint: `admin/payouts/${id}/send`,
+      method: 'POST'
+    });
+    showNotification(response.data?.message || 'Payout initiated successfully', 'success');
+    return response;
+  } catch (error) {
+    showNotification(error.message, 'error');
+    throw error;
+  }
+}
