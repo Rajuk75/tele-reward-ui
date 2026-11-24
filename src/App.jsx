@@ -22,7 +22,7 @@ const App = () => {
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        <Router>
+        <Router basename={import.meta.env.BASE_URL}>
           <ErrorBoundary>
             <ScrollToTopOnNavigate />
             <AppRoutes />

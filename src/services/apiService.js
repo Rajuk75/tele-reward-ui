@@ -43,7 +43,7 @@ export default async function callApi({
             localStorage.removeItem('user');
             
             setTimeout(() => {
-                window.location.href = '/login';
+                window.location.href = `${import.meta.env.BASE_URL}login`;
             }, 1000);
         }
 
