@@ -114,7 +114,7 @@ export default function OfferCreateModal({
             }
             for (let i = 0; i < selectedEvents.length; i++) {
                 const ev = selectedEvents[i];
-                if (ev.payout === '' || Number(ev.payout) < 0) {
+                if (!/^(?:[0-9]+(?:\.[0-9]{0,2})?|\.[0-9]{1,2})$/.test(ev.payout) || !Number.isFinite(Number(ev.payout))) {
                     showNotification(`Please enter a valid payout for "${ev.eventName || 'Event'}"`, 'error');
                     return false;
                 }

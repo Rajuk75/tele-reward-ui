@@ -8,37 +8,42 @@ import { uploadFile } from '../services/AppService';
  *   onChange — (url: string) => void  — called with the new URL after upload or URL paste
  *   tc       — theme classes object from useThemeClasses()
  */
-export default function OfferImageUploadField({ value, onChange, tc }) {
+export default function OfferImageUploadField({ value, onChange, tc, onUploadingChange }) {
     const [mode, setMode] = useState('upload');
-    const [preview, setPreview] = useState(null);
+    const [error, setError] = useState('');
     const [isUploading, setIsUploading] = useState(false);
 
     const handleFileChange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        setPreview(URL.createObjectURL(file));
+        setError('');
+        onUploadingChange?.(true);
         setIsUploading(true);
         try {
             const res = await uploadFile(file, 'offers');
             const url = res.data?.data?.url;
-            if (url) onChange(url);
+            if (!url) throw new Error('Upload returned no image URL.');
+            onChange(url);
         } catch (err) {
-            console.error('Image upload failed', err);
+            setError(err.message || 'Unable to upload image. Try again.');
         } finally {
             setIsUploading(false);
+            onUploadingChange?.(false);
         }
     };
 
-    const displaySrc = mode === 'upload' ? preview : value;
+    const displaySrc = value;
 
     return (
         <div className="space-y-3">
+            {error && <p role="alert" className="text-sm text-rose-700">{error}</p>}
             {/* Mode toggle */}
             <div className="flex items-center gap-2">
                 {['upload', 'url'].map((m) => (
                     <button
                         key={m}
                         type="button"
+                        disabled={isUploading}
                         onClick={() => setMode(m)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                             mode === m
@@ -70,7 +75,7 @@ export default function OfferImageUploadField({ value, onChange, tc }) {
 
                 {/* Upload or URL input */}
                 {mode === 'upload' ? (
-                    <div className="flex-1 flex flex-col gap-1">
+                    <div className="min-w-0 flex-1 flex flex-col gap-1">
                         <input
                             type="file"
                             accept="image/*"
@@ -97,7 +102,7 @@ export default function OfferImageUploadField({ value, onChange, tc }) {
                         value={value || ''}
                         onChange={(e) => onChange(e.target.value)}
                         placeholder="https://example.com/image.jpg"
-                        className={`flex-1 border rounded-lg px-3 py-1.5 text-sm focus:border-black outline-none transition ${tc.input}`}
+                        className={`min-w-0 flex-1 border rounded-lg px-3 py-1.5 text-sm focus:border-black outline-none transition ${tc.input}`}
                     />
                 )}
             </div>

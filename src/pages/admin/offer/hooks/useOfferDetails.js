@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getCampaignById } from '../../../../services/AppService';
 
-function buildForm(offer, campaign) {
+export function buildForm(offer, campaign) {
     const events = (offer.events || []).map((row, index) => {
         const event = row.campaignEventId;
         return {
-            campaignEventId: event?._id || event || row._id,
+            campaignEventId: event?._id || event,
             eventName: event?.name || row.eventName || `Milestone ${index + 1}`,
             order: event?.order ?? row.order ?? index + 1,
             payout: row.userPayout ?? row.payout ?? 0,
@@ -24,6 +24,7 @@ function buildForm(offer, campaign) {
         ...offer,
         campaignId: offer.campaignId?._id || offer.campaignId,
         events,
+        inputEnabled: !!offer.inputs?.length,
         spinEnabled: !!offer.spinSettings?.enabled,
         spinSlicesText: slices.join(', '),
         spinSlices: slices,

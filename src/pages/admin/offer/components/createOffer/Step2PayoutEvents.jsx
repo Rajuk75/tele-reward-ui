@@ -90,6 +90,7 @@ export default function Step2PayoutEvents({ form, onChange }) {
                                     <div className="flex items-start gap-3 min-w-0">
                                         <input
                                             type="checkbox"
+                                            aria-label={`Include ${ev.eventName}`}
                                             checked={!!ev.selected}
                                             onChange={(e) => handleToggleSelected(i, e.target.checked)}
                                             className="mt-1 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer"
@@ -135,15 +136,16 @@ export default function Step2PayoutEvents({ form, onChange }) {
 
                                     {/* Right side: User Payout input */}
                                     {ev.selected && (
-                                        <div className="sm:text-right shrink-0 min-w-[140px] pl-7 sm:pl-0">
+                                        <div className="sm:text-right sm:w-36 sm:shrink-0 min-w-0 pl-7 sm:pl-0">
                                             <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">
                                                 User Payout (₹) <span className="text-rose-500">*</span>
                                             </label>
                                             <div className="relative">
                                                 <input
-                                                    type="number"
-                                                    min="0"
-                                                    step="0.01"
+                                                    type="text"
+                                                    inputMode="decimal"
+                                                    pattern="([0-9]+(\.[0-9]{0,2})?|\.[0-9]{1,2})"
+                                                    aria-label={`User payout for ${ev.eventName}`}
                                                     value={ev.payout}
                                                     onChange={(e) => handlePayoutChange(i, e.target.value)}
                                                     placeholder="0.00"

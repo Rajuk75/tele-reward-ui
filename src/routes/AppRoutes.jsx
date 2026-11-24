@@ -83,6 +83,7 @@ const AppRoutes = () => {
 
                         <Route path="offers"                           element={<OfferPage />} />
                         <Route path="offers/:offerId"                  element={<OfferDetailsPage />} />
+                        <Route path="offers/:offerId/edit" element={<Navigate to=".." relative="path" replace />} />
                         <Route path="referrals"                        element={<ReferralList />} />
 
                         <Route path="conversions"                     element={<ConversionList />} />

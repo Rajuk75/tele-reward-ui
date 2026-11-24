@@ -2,7 +2,7 @@ import React from 'react';
 import OfferImageUploadField from '../../../../../components/OfferImageUploadField';
 import { useThemeClasses } from '../../../../../context/ThemeContext';
 
-export default function Step3Instructions({ form, onChange }) {
+export default function Step3Instructions({ form, onChange, onUploadingChange }) {
     const tc = useThemeClasses();
 
     return (
@@ -21,6 +21,7 @@ export default function Step3Instructions({ form, onChange }) {
                 <OfferImageUploadField
                     value={form.backgroundImage || ''}
                     onChange={(url) => onChange('backgroundImage', url)}
+                    onUploadingChange={onUploadingChange}
                     tc={tc}
                 />
             </div>

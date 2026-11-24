@@ -109,7 +109,7 @@ export default function Step4QualityPostback({ form, onChange }) {
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
                     <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                        <span>🎡 Lucky Spin & Win Bonus</span>
+                        <span>Spin bonus</span>
                     </h4>
 
                     <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-800">
@@ -177,7 +177,7 @@ export default function Step4QualityPostback({ form, onChange }) {
                                     value={inp.label}
                                     onChange={(e) => handleInputChange(idx, 'label', e.target.value)}
                                     placeholder="Field label (e.g. PhonePe Number)"
-                                    className="flex-1 px-3 py-1.5 text-xs font-medium rounded border border-slate-200 focus:outline-none focus:border-slate-400"
+                                    className="min-w-0 flex-1 px-3 py-1.5 text-xs font-medium rounded border border-slate-200 focus:outline-none focus:border-slate-400"
                                 />
                                 <select
                                     value={inp.type}
