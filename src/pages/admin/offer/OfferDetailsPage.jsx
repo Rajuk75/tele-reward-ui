@@ -24,9 +24,13 @@ function Card({ title, action, children }) {
 }
 
 function Detail({ label, children }) {
+    let content = children;
+    if (typeof children === 'boolean') {
+        content = children ? 'Yes' : 'No';
+    }
     return <div className="min-w-0">
         <dt className="text-xs font-medium text-slate-500">{label}</dt>
-        <dd className="mt-1 whitespace-pre-line text-sm leading-relaxed text-slate-800">{children ?? '—'}</dd>
+        <dd className="mt-1 whitespace-pre-line text-sm leading-relaxed text-slate-800">{content ?? '—'}</dd>
     </div>;
 }
 
@@ -211,8 +215,8 @@ function OfferView({ offer }) {
                     <Detail label="Priority">{offer.priority}</Detail>
                     <Detail label="One UPI per completion">{offer.oneUpiOneTime}</Detail>
                     <Detail label="Active">{offer.isActive}</Detail>
-                    <Detail label="Spin enabled">{offer.spinSettings?.enabled}</Detail>
-                    <Detail label="Spin amounts">{offer.spinSettings?.slices?.map(money).join(', ') || 'None'}</Detail>
+                    <Detail label="Spin enabled">{Boolean(offer.spinSettings?.enabled)}</Detail>
+                    <Detail label="Spin amounts">{offer.spinSettings?.enabled && offer.spinSettings?.slices?.length ? offer.spinSettings.slices.map(money).join(', ') : 'No'}</Detail>
                     <Detail label="Custom input fields"><ConfiguredFields items={offer.inputs} /></Detail>
                 </dl>
                 <h3 className="border-t border-slate-100 pt-4 text-sm font-semibold">Tracking and redirection</h3>
