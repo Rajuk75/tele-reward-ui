@@ -67,10 +67,8 @@ export function useCampaigns() {
             await deleteCampaign(id);
             setDeleteTarget(null);
             fetchCampaigns();
-            showNotification('Campaign deleted successfully', 'success');
         } catch (error) {
             console.error('Error deleting campaign:', error);
-            showNotification(error?.response?.data?.message || 'Failed to delete campaign', 'error');
             setDeleteTarget(null);
         } finally {
             setIsDeleting(false);

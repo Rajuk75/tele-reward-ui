@@ -60,10 +60,8 @@ export function useOffers() {
             await deleteOffer(id);
             setDeleteTarget(null);
             fetchOffers();
-            showNotification('Offer deleted successfully', 'success');
         } catch (error) {
             console.error('Error deleting offer:', error);
-            showNotification(error?.response?.data?.message || 'Failed to delete offer', 'error');
             setDeleteTarget(null);
         } finally {
             setIsDeleting(false);
@@ -79,10 +77,8 @@ export function useOffers() {
                 isActive: nextStatus === 'active',
             });
             fetchOffers();
-            showNotification(`Offer ${nextStatus === 'active' ? 'activated' : 'deactivated'} successfully`, 'success');
         } catch (error) {
             console.error('Error updating offer status:', error);
-            showNotification(error?.response?.data?.message || 'Failed to update offer status', 'error');
         } finally {
             setIsUpdatingStatus(false);
         }
