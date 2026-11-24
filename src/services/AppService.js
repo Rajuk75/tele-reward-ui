@@ -218,10 +218,37 @@ export async function createOffer(data) {
   }
 }
 
+export async function updateOffer(id, data) {
+  try {
+    const response = await callApi({
+      endpoint: `admin/offers/${id}`,
+      method: 'PUT',
+      body: data
+    });
+    showNotification(response.data?.message || 'Offer updated successfully', 'success');
+    return response;
+  } catch (error) {
+    showNotification(error.message, 'error');
+    throw error;
+  }
+}
+
 export async function getOffers(params = {}) {
   try {
     return await callApi({
       endpoint: `admin/offers${buildQuery(params)}`,
+      method: 'GET'
+    });
+  } catch (error) {
+    showNotification(error.message, 'error');
+    throw error;
+  }
+}
+
+export async function getOfferById(id) {
+  try {
+    return await callApi({
+      endpoint: `admin/offers/${id}`,
       method: 'GET'
     });
   } catch (error) {

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
     PlusIcon,
@@ -77,7 +78,7 @@ function StatusPill({ status, isActive }) {
     );
 }
 
-function OfferActionMenu({ offer, actions }) {
+function OfferActionMenu({ offer, actions, navigate }) {
     return (
         <ActionDropdown>
             {({ close }) => (
@@ -86,7 +87,7 @@ function OfferActionMenu({ offer, actions }) {
                         type="button"
                         onClick={() => {
                             close();
-                            actions.setDetailTarget(offer);
+                            navigate(`/admin/offers/${offer._id}`);
                         }}
                         className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 flex items-center gap-2 cursor-pointer transition-colors"
                     >
@@ -134,6 +135,7 @@ function OfferActionMenu({ offer, actions }) {
 }
 
 export default function OfferPage() {
+    const navigate = useNavigate();
     const offersState = useOffers();
     const actions = offersState;
     const { modal, step, openModal, closeModal, setStep } = useQueryState();
@@ -279,6 +281,7 @@ export default function OfferPage() {
                 <OfferActionMenu
                     offer={o}
                     actions={actions}
+                    navigate={navigate}
                 />
             ),
         },
