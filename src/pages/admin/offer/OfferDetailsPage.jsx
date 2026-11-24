@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getOfferById } from '../../../services/AppService';
 import { showSuccess, showError } from '../../../components/Toastify/Toast';
 import { CopyIcon, CheckIcon, ChevronRightIcon } from '../../../components/common/Icons';
+import BackButton from '../../../components/common/BackButton';
 import OfferSectionEditor from './components/OfferSectionEditor';
 import { useThemeClasses } from '../../../context/ThemeContext';
 
@@ -272,15 +273,7 @@ export default function OfferDetailsPage() {
     } });
     return <main className="mx-auto w-full min-w-0 max-w-6xl space-y-5 px-4 py-5 text-slate-900 [overflow-wrap:anywhere] sm:px-6 sm:py-7 lg:px-8">
         <nav aria-label="Offer navigation">
-            <button
-                type="button"
-                onClick={() => navigate(-1)}
-                aria-label="Go back"
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
-            >
-                <ChevronRightIcon aria-hidden="true" size={16} strokeWidth={2.5} className="rotate-180 text-slate-800" />
-                <span>Back</span>
-            </button>
+            <BackButton />
         </nav>
         {detail.data ? <OfferView key={offerId} offer={detail.data} /> : <div role="status" className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6">
             <h1 className="text-lg font-semibold">{detail.isError ? 'Unable to load offer details' : 'Loading offer details…'}</h1>
