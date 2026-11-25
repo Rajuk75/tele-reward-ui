@@ -1,6 +1,6 @@
 import { FiMousePointer, FiLink, FiUsers, FiCheckCircle } from 'react-icons/fi';
-import { Metric } from '../../../components/common/DetailSections';
-import { grid } from './reportFormat';
+import { Metric } from '../../../../components/common/DetailSections';
+import { grid } from '../utils/reportFormat';
 
 export default function ClickOverview({ summary }) {
     if (!summary) return null;

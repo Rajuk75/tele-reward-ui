@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { getConversionRevenue } from '../../../services/AppService';
+import { getConversionRevenue } from '../../../../services/AppService';
 import { FiBriefcase, FiGift, FiTrendingUp, FiCheckCircle } from 'react-icons/fi';
-import { Metric } from '../../../components/common/DetailSections';
-import { grid, money } from './reportFormat';
+import { Metric } from '../../../../components/common/DetailSections';
+import { grid, money } from '../utils/reportFormat';
 
 export default function ConversionOverview() {
     const query = useQuery({ queryKey: ['admin-conversion-revenue'], queryFn: async () => (await getConversionRevenue()).data.data.summary });

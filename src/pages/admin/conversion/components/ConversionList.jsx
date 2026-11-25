@@ -1,8 +1,8 @@
-import DateTimeCell from '../../../components/common/table/DateTimeCell';
-import useConversions from './hooks/useConversions';
+import DateTimeCell from '../../../../components/common/table/DateTimeCell';
+import useConversions from '../hooks/useConversions';
 import ReportTable from './ReportTable';
 import ConversionOverview from './ConversionOverview';
-import { recipient, earned, money } from './reportFormat';
+import { recipient, earned, money } from '../utils/reportFormat';
 import TrackingDetails from './TrackingDetails';
 
 function columns(first, status) {

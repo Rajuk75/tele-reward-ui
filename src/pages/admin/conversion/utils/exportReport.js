@@ -1,5 +1,5 @@
-import { getTrackingClicks } from '../../../services/clickReportApi';
-import { getConversions, getPayouts } from '../../../services/AppService';
+import { getTrackingClicks } from '../../../../services/clickReportApi';
+import { getConversions, getPayouts } from '../../../../services/AppService';
 import { tabs, title, recipient, date, earned } from './reportFormat';
 
 export default async function exportReport(tab, filters) {

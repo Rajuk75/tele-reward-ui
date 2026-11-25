@@ -1,8 +1,8 @@
-import DateTimeCell from '../../../components/common/table/DateTimeCell';
-import useClicks from './hooks/useClicks';
+import DateTimeCell from '../../../../components/common/table/DateTimeCell';
+import useClicks from '../hooks/useClicks';
 import ReportTable from './ReportTable';
 import ClickOverview from './ClickOverview';
-import { recipient } from './reportFormat';
+import { recipient } from '../utils/reportFormat';
 import TrackingDetails from './TrackingDetails';
 
 function columns(first, status) {

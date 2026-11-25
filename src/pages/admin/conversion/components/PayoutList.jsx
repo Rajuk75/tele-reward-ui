@@ -1,9 +1,9 @@
-import DateTimeCell from '../../../components/common/table/DateTimeCell';
-import usePayouts from './hooks/usePayouts';
+import DateTimeCell from '../../../../components/common/table/DateTimeCell';
+import usePayouts from '../hooks/usePayouts';
 import ReportTable from './ReportTable';
 import PayoutOverview from './PayoutOverview';
-import { money, title } from './reportFormat';
-import { Detail } from '../../../components/common/DetailSections';
+import { money, title } from '../utils/reportFormat';
+import { Detail } from '../../../../components/common/DetailSections';
 
 const fields = 'grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3';
 

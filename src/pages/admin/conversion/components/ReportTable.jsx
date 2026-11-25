@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { FiDownload } from 'react-icons/fi';
-import DataTable from '../../../components/common/table/DataTable';
-import { ChevronRightIcon } from '../../../components/common/Icons';
-import { tabs, recipient, title, button } from './reportFormat';
+import DataTable from '../../../../components/common/table/DataTable';
+import { ChevronRightIcon } from '../../../../components/common/Icons';
+import { tabs, recipient, title, button } from '../utils/reportFormat';
 import ReportFilters from './ReportFilters';
-import exportReport from './exportReport';
+import exportReport from '../utils/exportReport';
 
 export default function ReportTable(props) {
     const { tab, useReport, Overview, makeColumns, Details } = props;

@@ -1,8 +1,8 @@
 import { useSearchParams } from 'react-router-dom';
-import { tabs } from './reportFormat';
-import ConversionList from './ConversionList';
-import ClickList from './ClickList';
-import PayoutList from './PayoutList';
+import { tabs } from './utils/reportFormat';
+import ConversionList from './components/ConversionList';
+import ClickList from './components/ClickList';
+import PayoutList from './components/PayoutList';
 
 export default function ConversionPage() {
     const [params, setParams] = useSearchParams();

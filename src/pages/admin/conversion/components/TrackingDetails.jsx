@@ -1,7 +1,7 @@
-import DateTimeCell from '../../../components/common/table/DateTimeCell';
+import DateTimeCell from '../../../../components/common/table/DateTimeCell';
 import LegacyConversionReview from './LegacyConversionReview';
-import { Detail } from '../../../components/common/DetailSections';
-import { money, title } from './reportFormat';
+import { Detail } from '../../../../components/common/DetailSections';
+import { money, title } from '../utils/reportFormat';
 
 export default function TrackingDetails({ row, tab, onClose }) {
     return <div className="sticky left-0 w-[100cqw] max-w-full space-y-4 bg-slate-50 p-4 sm:p-5 [overflow-wrap:anywhere]">

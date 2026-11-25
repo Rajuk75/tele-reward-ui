@@ -1,5 +1,5 @@
 import React from 'react';
-import { useThemeClasses } from '../../../context/ThemeContext';
+import { useThemeClasses } from '../../../../context/ThemeContext';
 
 export function DashboardStatCard({ label, value, sub, Icon, colorClass = 'text-indigo-600', bgClass = 'bg-indigo-50', isLoading, isGolden, isEmerald }) {
     const tc = useThemeClasses();

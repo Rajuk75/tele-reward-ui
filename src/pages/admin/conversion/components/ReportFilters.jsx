@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { useThemeClasses } from '../../../context/ThemeContext';
-import { CampaignSearchDropdown } from '../common/AdminUI';
-import { button, payoutStatuses, title } from './reportFormat';
+import { useThemeClasses } from '../../../../context/ThemeContext';
+import { CampaignSearchDropdown } from '../../common/AdminUI';
+import { button, payoutStatuses, title } from '../utils/reportFormat';
 
 const trackingStatuses = ['clicked', 'pending', 'in_progress', 'partially_completed', 'pending_approval', 'completed', 'rejected', 'fraud', 'scrubbed'];
 const payoutTypes = ['offer_completion', 'offer_referral', 'user_referral', 'registration_bonus', 'manual_bonus', 'spin_bonus'];

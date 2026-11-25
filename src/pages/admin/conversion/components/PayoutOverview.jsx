@@ -1,6 +1,6 @@
 import { FiCheckCircle, FiClock, FiRefreshCw, FiAlertCircle } from 'react-icons/fi';
-import { Metric } from '../../../components/common/DetailSections';
-import { grid, payoutStatuses, title, money } from './reportFormat';
+import { Metric } from '../../../../components/common/DetailSections';
+import { grid, payoutStatuses, title, money } from '../utils/reportFormat';
 
 const payoutIcons = { paid: FiCheckCircle, unpaid: FiClock, processing: FiRefreshCw, failed: FiAlertCircle };
 
