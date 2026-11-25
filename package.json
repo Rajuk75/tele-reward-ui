@@ -17,7 +17,8 @@
     "react-icons": "^5.5.0",
     "react-router-dom": "^6.30.2",
     "react-toastify": "^11.1.0",
-    "recharts": "^3.3.0"
+    "recharts": "^3.3.0",
+    "write-excel-file": "^2.3.10"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

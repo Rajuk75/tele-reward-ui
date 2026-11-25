@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
     getConversionById, getConversionSignedUrl,
@@ -42,7 +42,6 @@ const ProofViewer = React.memo(({ url, label, onClose }) => {
         enabled: !!url,
     });
 
-    const isImage = signedUrl && (signedUrl.match(/\.(jpeg|jpg|gif|png|webp)/i) || signedUrl.includes('image'));
     const isPdf   = signedUrl && (signedUrl.match(/\.(pdf)/i) || signedUrl.includes('pdf'));
 
     return (
@@ -134,7 +133,7 @@ function RejectionReasonModal({ onClose, onConfirm, tc }) {
                         <FormField label="Additional Note" tc={tc}>
                             <TextArea 
                                 value={customNote}
-                                onChange={setCustomNote}
+                                onChange={e => setCustomNote(e.target.value)}
                                 placeholder="Enter specific details for the user..."
                                 tc={tc}
                             />
@@ -152,16 +151,11 @@ function RejectionReasonModal({ onClose, onConfirm, tc }) {
 
 /* ── Main Detail Modal ───────────────────────────────────────────────────── */
 
-export default function ConversionDetailModal({ trackingId, onClose }) {
+export default function LegacyConversionReview({ trackingId, onClose }) {
     const queryClient  = useQueryClient();
     const tc           = useThemeClasses();
     const [note, setNote] = useState('');
     const [activeProof, setActiveProof] = useState(null);
-
-    useEffect(() => {
-        document.body.style.overflow = 'hidden';
-        return () => { document.body.style.overflow = 'unset'; };
-    }, []);
 
     const { data: c, isLoading, refetch } = useQuery({
         queryKey: ['admin-conversion-detail', trackingId],
@@ -173,6 +167,7 @@ export default function ConversionDetailModal({ trackingId, onClose }) {
         mutationFn: () => approveConversion(trackingId, note),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-conversions'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-clicks'] });
             onClose();
         },
     });
@@ -181,6 +176,7 @@ export default function ConversionDetailModal({ trackingId, onClose }) {
         mutationFn: () => rejectConversion(trackingId, note),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-conversions'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-clicks'] });
             onClose();
         },
     });
@@ -237,28 +233,8 @@ export default function ConversionDetailModal({ trackingId, onClose }) {
 
     return (
         <>
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-                <div className={`relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl shadow-sm border ${tc.border} overflow-hidden ${
-                    tc.isDark ? tc.card : 'bg-slate-100'
-                }`}>
-                    {/* Global Noise Texture for the entire modal in light mode */}
-                    {!tc.isDark && (
-                        <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-multiply"
-                            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
-                        />
-                    )}
-
-                    {/* Header */}
-                    <div className={`px-6 py-4 border-b flex items-center justify-between ${tc.border} ${tc.isDark ? 'bg-white/5' : 'bg-white/50'}`}>
-                        <div>
-                            <h2 className={`text-lg font-black tracking-tight ${tc.text}`}>Conversion Audit</h2>
-                            <p className={`text-[10px] font-bold uppercase tracking-widest opacity-50 ${tc.text}`}>Tracking ID: {trackingId}</p>
-                        </div>
-                        <button onClick={onClose} className={`p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition ${tc.textMuted}`}>
-                            <FiX size={20} />
-                        </button>
-                    </div>
-
+            <div className="min-w-0 bg-white">
+                <div>
                     {isLoading ? (
                         <div className="flex-1 flex flex-col items-center justify-center p-20 gap-4">
                             <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
@@ -496,7 +472,7 @@ export default function ConversionDetailModal({ trackingId, onClose }) {
                                 <FormField label="Admin Note (Internal)" tc={tc}>
                                     <TextArea
                                         value={note}
-                                        onChange={(v) => { setNote(v); if(noteError) setNoteError(false); }}
+                                        onChange={(e) => { setNote(e.target.value); if(noteError) setNoteError(false); }}
                                         placeholder="Write internal notes about this conversion..."
                                         tc={tc}
                                         rows={2}

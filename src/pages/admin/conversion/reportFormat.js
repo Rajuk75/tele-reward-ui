@@ -1,0 +1,10 @@
+export const tabs = { conversions: 'Conversions', clicks: 'Clicks', payouts: 'Payouts' };
+export const payoutStatuses = ['unpaid', 'processing', 'paid', 'failed'];
+export const button = 'rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50';
+export const grid = 'grid gap-3 sm:grid-cols-2 xl:grid-cols-4';
+const currency = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
+export const money = paise => currency.format(Number(paise ?? 0) / 100);
+export const date = value => value ? new Date(value).toLocaleString('en-IN') : '—';
+export const title = value => value ? value.replaceAll('_', ' ').replace(/^./, c => c.toUpperCase()) : '—';
+export const recipient = row => row.payoutHolderName || row.userId?.name || row.payoutAccount || row.userId?.email || 'Unknown recipient';
+export const earned = row => row.earnedUserAmountPaise ?? Math.round(Number(row.totalAmountAwarded || row.amountAwarded || 0) * 100);

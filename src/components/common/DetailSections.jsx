@@ -22,9 +22,12 @@ export function Detail({ label, children }) {
     </div>;
 }
 
-export function Metric({ label, children }) {
-    return <div className="min-w-0 bg-white p-4 sm:p-5">
-        <dt className="text-xs text-slate-500">{label}</dt>
+export function Metric({ label, children, icon: Icon }) {
+    return <div className={`min-w-0 bg-white p-4 sm:p-5 ${Icon ? 'rounded-xl border border-slate-200 shadow-xs' : ''}`}>
+        <dt className="flex items-center gap-2 text-xs text-slate-600">
+            {Icon && <Icon aria-hidden="true" className="size-7 shrink-0 rounded-lg bg-slate-100 p-1.5 text-slate-700" />}
+            {label}
+        </dt>
         <dd className="mt-1 text-xl font-semibold tabular-nums">{display(children)}</dd>
     </div>;
 }

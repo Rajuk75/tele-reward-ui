@@ -566,6 +566,10 @@ export async function verifyIfscCode(ifscCode) {
 
 // ── Postback Logs ─────────────────────────────────────────────────────────────
 
+export function getPostbackOverview() {
+  return callApi({ endpoint: 'admin/postbacks/overview', method: 'GET' });
+}
+
 export async function getPostbackLogs(params = {}) {
   try {
     return await callApi({

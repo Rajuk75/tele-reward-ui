@@ -8,7 +8,7 @@ import {
 } from 'react-icons/fi';
 import { FaRupeeSign } from 'react-icons/fa';
 import { useThemeClasses } from '../../../context/ThemeContext';
-import { DashboardStatCard } from './StatCard';
+import { DashboardStatCard } from './components/StatCard';
 import { getDashboardStats } from '../../../services/AppService';
 
 /* ── UI Components ────────────────────────────────────────────────────────── */
