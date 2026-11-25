@@ -6,6 +6,7 @@ export function useUsers() {
     // State
     // ==========================================
     const [users, setUsers] = useState([]);
+    const [stats, setStats] = useState({ total: 0, active: 0, inactive: 0 });
     const [pagination, setPagination] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [isError, setIsError] = useState(false);
@@ -50,6 +51,11 @@ export function useUsers() {
             });
             const data = response.data?.data;
             setUsers(data?.users ?? []);
+            setStats(data?.stats ?? {
+                total: data?.pagination?.total ?? 0,
+                active: 0,
+                inactive: 0,
+            });
             setPagination(data?.pagination ?? {});
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -100,13 +106,6 @@ export function useUsers() {
         } finally {
             setIsDeleting(false);
         }
-    };
-
-    const stats = {
-        total: pagination?.total || 1248,
-        active: 1180,
-        admins: 8,
-        standardUsers: 1240,
     };
 
     return {
