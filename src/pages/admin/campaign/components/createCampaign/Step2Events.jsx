@@ -1,7 +1,7 @@
 import React from 'react';
 import { FiPlus, FiTrash2 } from 'react-icons/fi';
 
-export default function Step2Events({ form, onChange }) {
+export default function Step2Events({ form, onChange, renderEventDetails }) {
     const events = form.events || [];
 
     const updateEvent = (index, field, value) => {
@@ -60,7 +60,7 @@ export default function Step2Events({ form, onChange }) {
                             )}
                         </div>
 
-                        <div className="flex flex-nowrap items-end gap-3 overflow-x-auto pb-1 [&>*]:min-w-36 [&>*]:flex-1">
+                        <div className="grid items-end gap-3 sm:grid-cols-2">
                             {/* Event Title */}
                             <div>
                                 <label className="mb-1.5 block text-xs font-medium text-slate-700">
@@ -107,6 +107,7 @@ export default function Step2Events({ form, onChange }) {
                                 />
                             </div>
                         </div>
+                        {renderEventDetails?.(ev, (field, value) => updateEvent(idx, field, value))}
                     </div>
                 ))}
             </div>

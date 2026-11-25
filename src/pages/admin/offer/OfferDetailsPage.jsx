@@ -1,38 +1,18 @@
 import { useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getOfferById } from '../../../services/AppService';
 import { showSuccess, showError } from '../../../components/Toastify/Toast';
 import { CopyIcon, CheckIcon, ChevronRightIcon } from '../../../components/common/Icons';
 import BackButton from '../../../components/common/BackButton';
+import { dateTime, display } from '../../../components/common/detailFormat';
 import OfferSectionEditor from './components/OfferSectionEditor';
-import { useThemeClasses } from '../../../context/ThemeContext';
+import { Card, Detail, Metric, Metadata } from '../../../components/common/DetailSections';
 
 
 const secondary = 'inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50';
 const money = value => '₹' + Number(value ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const statusStyles = { active: 'bg-emerald-50 text-emerald-800', paused: 'bg-amber-50 text-amber-800', expired: 'bg-rose-50 text-rose-800' };
-
-function Card({ title, action, children }) {
-    const theme = useThemeClasses();
-    return <section className={`min-w-0 rounded-2xl ${theme.card}`}>
-        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-4 py-4 sm:px-5">
-            <h2 className="text-base font-semibold">{title}</h2>{action}
-        </header>
-        <div className="space-y-4 p-4 sm:p-5">{children}</div>
-    </section>;
-}
-
-function Detail({ label, children }) {
-    let content = children;
-    if (typeof children === 'boolean') {
-        content = children ? 'Yes' : 'No';
-    }
-    return <div className="min-w-0">
-        <dt className="text-xs font-medium text-slate-500">{label}</dt>
-        <dd className="mt-1 whitespace-pre-line text-sm leading-relaxed text-slate-800">{content ?? '—'}</dd>
-    </div>;
-}
 
 function CopyButton({ value, label, iconOnly = false }) {
     const [copied, setCopied] = useState(false);
@@ -49,40 +29,6 @@ function CopyButton({ value, label, iconOnly = false }) {
         className={iconOnly ? 'inline-grid size-8 shrink-0 place-items-center rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50' : secondary}>
         {copied ? <CheckIcon /> : <CopyIcon />}<span className={iconOnly ? 'sr-only' : undefined}>{caption}</span>
     </button>;
-}
-
-function display(value) {
-    if (value === true) return 'Yes';
-    if (value === false) return 'No';
-    if (value == null || value === '') return 'Not set';
-    return value;
-}
-
-function Metric({ label, children }) {
-    return <div className="min-w-0 bg-white p-4 sm:p-5">
-        <dt className="text-xs text-slate-500">{label}</dt>
-        <dd className="mt-1 text-xl font-semibold tabular-nums">{display(children)}</dd>
-    </div>;
-}
-
-function dateTime(value) {
-    if (!value) return null;
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
-    return <time dateTime={value} title={value}>{date.toLocaleString(undefined, {
-        year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', timeZoneName: 'short',
-    })}</time>;
-}
-
-function Metadata({ record, children }) {
-    return <details className="border-t border-slate-100 pt-3">
-        <summary className="cursor-pointer text-sm font-medium text-slate-600">Record details</summary>
-        <dl className="mt-4 grid gap-4">
-            <Detail label="Created">{dateTime(record.createdAt)}</Detail>
-            <Detail label="Updated">{dateTime(record.updatedAt)}</Detail>
-            {children}
-        </dl>
-    </details>;
 }
 
 function ConfiguredFields({ items }) {
@@ -233,7 +179,7 @@ function OfferView({ offer }) {
                 </>}
             </Card>
         </div>
-        <Card title="Campaign details" action={campaign._id && <Link className="text-sm font-medium underline underline-offset-4" to={`/admin/campaigns?search=${encodeURIComponent(campaign.name || '')}`}>View campaign</Link>}>
+        <Card title="Campaign details" action={campaign._id && <Link className="text-sm font-medium underline underline-offset-4" to={`/admin/campaigns/${campaign._id}`}>View campaign</Link>}>
             <dl className="grid gap-4 sm:grid-cols-2">
                 <Detail label="Campaign name"><span className="flex items-center gap-3">
                     {showCampaignLogo && <img src={campaign.imageUrl} alt={`${campaign.name || 'Campaign'} logo`}
@@ -268,7 +214,6 @@ function OfferView({ offer }) {
 
 export default function OfferDetailsPage() {
     const { offerId } = useParams();
-    const navigate = useNavigate();
     const detail = useQuery({ queryKey: ['offer-details', offerId], queryFn: async () => {
         const response = await getOfferById(offerId);
         const record = response.data?.data;

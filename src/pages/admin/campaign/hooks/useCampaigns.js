@@ -30,7 +30,6 @@ export function useCampaigns() {
 
     // Row & Modal states
     const [expandedId, setExpandedId] = useState(null);
-    const [editId, setEditId] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -116,8 +115,6 @@ export function useCampaigns() {
         // Action states & handlers
         expandedId,
         toggleRow,
-        editId,
-        setEditId,
         deleteTarget,
         setDeleteTarget,
         isDeleting,

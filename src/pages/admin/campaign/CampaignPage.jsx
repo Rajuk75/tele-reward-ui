@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { PlusIcon, LayersIcon, MoreVerticalIcon, CalendarIcon, ChevronRightIcon } from '../../../components/common/Icons';
 import { useThemeClasses } from '../../../context/ThemeContext';
 import { useQueryState } from '../../../hooks/useQueryState';
@@ -58,16 +59,10 @@ function CampaignRowActions({ campaign, actions }) {
         <ActionDropdown>
             {({ close }) => (
                 <>
-                    <button
-                        type="button"
-                        onClick={() => {
-                            close();
-                            actions.setEditId(campaign._id);
-                        }}
-                        className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 flex items-center gap-2 cursor-pointer transition-colors"
-                    >
-                        Edit
-                    </button>
+                    <Link to={`/admin/campaigns/${campaign._id}`} onClick={close}
+                        className="block px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">View details</Link>
+                    <Link to={`/admin/campaigns/${campaign._id}?edit=basic`} onClick={close}
+                        className="block px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">Edit</Link>
 
                     <div className="my-1 border-t border-slate-100" />
 

@@ -34,6 +34,7 @@ const Login               = lazyWithErrorHandling(() => import("../pages/Login")
 
 // ── Admin panel pages ─────────────────────────────────────────────────────────
 const MainDashboard       = lazyWithErrorHandling(() => import("../pages/admin/dashboard/MainDashboard"));
+const CampaignDetailsPage = lazyWithErrorHandling(() => import("../pages/admin/campaign/CampaignDetailsPage"));
 const CampaignPage        = lazyWithErrorHandling(() => import("../pages/admin/campaign/CampaignPage"));
 
 const OfferPage           = lazyWithErrorHandling(() => import("../pages/admin/offer/OfferPage"));
@@ -81,6 +82,7 @@ const AppRoutes = () => {
                         <Route path="dashboard"                        element={<MainDashboard />} />
                         <Route path="campaigns"                        element={<CampaignPage />} />
 
+                        <Route path="campaigns/:campaignId" element={<CampaignDetailsPage />} />
                         <Route path="offers"                           element={<OfferPage />} />
                         <Route path="offers/:offerId"                  element={<OfferDetailsPage />} />
                         <Route path="offers/:offerId/edit" element={<Navigate to=".." relative="path" replace />} />
