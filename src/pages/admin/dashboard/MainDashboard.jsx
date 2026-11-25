@@ -148,7 +148,7 @@ export default function MainDashboard() {
 
     if (query.isLoading) {
         return (
-            <div className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6">
+            <div className="w-full space-y-5 p-4 sm:p-6">
                 <div className="h-8 w-48 animate-pulse rounded-lg bg-slate-200" />
                 <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -161,7 +161,7 @@ export default function MainDashboard() {
 
     if (query.isError) {
         return (
-            <div className="mx-auto max-w-7xl p-4 sm:p-6">
+            <div className="w-full p-4 sm:p-6">
                 <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
                     Unable to load dashboard analytics.{' '}
                     <button type="button" onClick={() => query.refetch()} className="font-semibold underline">
@@ -206,7 +206,7 @@ export default function MainDashboard() {
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900">
-            <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
+            <div className="w-full space-y-6 p-4 sm:p-6">
                 {/* ── Page Header ── */}
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
