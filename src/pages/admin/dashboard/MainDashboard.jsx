@@ -1,300 +1,440 @@
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import {
-    BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer,
-    AreaChart, Area, PieChart, Pie, Cell,
+    Area,
+    AreaChart,
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
 } from 'recharts';
 import {
-    FiTarget, FiDollarSign, FiTag, FiClock, FiCreditCard, FiUsers, FiTrendingUp,
+    FiCheckCircle,
+    FiCreditCard,
+    FiGift,
+    FiMousePointer,
+    FiRefreshCw,
+    FiTag,
+    FiTarget,
+    FiTrendingUp,
 } from 'react-icons/fi';
 import { FaRupeeSign } from 'react-icons/fa';
-import { useThemeClasses } from '../../../context/ThemeContext';
-import { DashboardStatCard } from './components/StatCard';
 import { getDashboardStats } from '../../../services/AppService';
+import { Metric } from '../../../components/common/DetailSections';
 
-/* ── UI Components ────────────────────────────────────────────────────────── */
+const panel = 'min-w-0 rounded-xl border border-slate-200 bg-white p-4 sm:p-5';
+const dayLabel = new Intl.DateTimeFormat('en-IN', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+const formatDay = (value) => (value ? dayLabel.format(new Date(value)) : '');
+const currency = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+const moneyFromPaise = (paise) => currency.format(Math.round(Number(paise || 0) / 100));
 
-const noiseTexture = `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`;
+const PAYOUT_STATUS_META = [
+    { key: 'paid', label: 'Paid', color: '#059669' },
+    { key: 'unpaid', label: 'Pending', color: '#d97706' },
+    { key: 'processing', label: 'Processing', color: '#2563eb' },
+    { key: 'failed', label: 'Failed', color: '#e11d48' },
+];
 
-function GlassCard({ children, className = '', isDark }) {
+const CLICK_STATUS_META = [
+    { key: 'completed', label: 'Completed', color: '#059669' },
+    { key: 'pending', label: 'Pending', color: '#d97706' },
+    { key: 'pending_approval', label: 'Approval', color: '#f59e0b' },
+    { key: 'clicked', label: 'Clicked', color: '#6366f1' },
+    { key: 'rejected', label: 'Rejected', color: '#e11d48' },
+];
+
+const CATEGORY_COLORS = ['#4f46e5', '#059669', '#d97706', '#db2777', '#0284c7', '#7c3aed'];
+
+const ACTIVITY_STATUS_BADGE = {
+    completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    pending: 'bg-amber-50 text-amber-700 border-amber-200',
+    pending_approval: 'bg-amber-50 text-amber-700 border-amber-200',
+    pending_proof: 'bg-amber-50 text-amber-700 border-amber-200',
+    clicked: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    rejected: 'bg-rose-50 text-rose-700 border-rose-200',
+};
+
+function ChartTooltip({ active, payload, label, isCurrency = false, isDateLabel = false }) {
+    if (!active || !payload?.length) return null;
+    const heading = isDateLabel && label ? formatDay(label) : label;
     return (
-        <div className={`relative rounded-2xl overflow-hidden group transition-all duration-500 ${className} ${
-            isDark 
-                ? 'bg-white/[0.03] shadow-2xl' 
-                : 'bg-white shadow-sm'
-        }`}>
-
-            <div className={`relative h-full p-6 rounded-2xl backdrop-blur-md ${
-                isDark 
-                    ? 'bg-transparent' 
-                    : 'bg-white/10'
-            }`}>
-                {/* Noise Texture Layer */}
-                <div 
-                    className={`absolute inset-0 pointer-events-none mix-blend-overlay ${isDark ? 'opacity-[0.05]' : 'opacity-[0.2]'}`}
-                    style={{ backgroundImage: noiseTexture }}
-                />
-                <div className="relative z-10 h-full">
-                    {children}
-                </div>
+        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-md">
+            {heading && <p className="mb-1.5 font-semibold text-slate-700">{heading}</p>}
+            <div className="space-y-1">
+                {payload.map((entry) => (
+                    <div key={entry.dataKey || entry.name} className="flex items-center justify-between gap-4">
+                        <span className="flex items-center gap-1.5 text-slate-600">
+                            <span className="size-2 rounded-full" style={{ backgroundColor: entry.color || entry.payload?.color }} />
+                            {entry.name}
+                        </span>
+                        <span className="font-semibold tabular-nums text-slate-900">
+                            {isCurrency ? `₹${Number(entry.value || 0).toLocaleString('en-IN')}` : Number(entry.value || 0).toLocaleString('en-IN')}
+                        </span>
+                    </div>
+                ))}
             </div>
         </div>
     );
 }
 
-/* ── Dummy Data ───────────────────────────────────────────────────────────── */
-const monthlyRevenue = [
-    { month: 'Nov', revenue: 28000, payouts: 17500 },
-    { month: 'Dec', revenue: 35400, payouts: 22000 },
-    { month: 'Jan', revenue: 31200, payouts: 19800 },
-    { month: 'Feb', revenue: 42600, payouts: 27000 },
-    { month: 'Mar', revenue: 38100, payouts: 24400 },
-    { month: 'Apr', revenue: 45231, payouts: 29100 },
-];
+function DonutCard({ title, subtitle, data, emptyMessage, valueFormatter }) {
+    const total = data.reduce((sum, item) => sum + item.value, 0);
+    const nonZero = data.filter((item) => item.value > 0);
 
-const conversionTrend = [
-    { day: '1',  conv: 38 }, { day: '3',  conv: 55 }, { day: '5',  conv: 47 },
-    { day: '7',  conv: 68 }, { day: '9',  conv: 61 }, { day: '11', conv: 79 },
-    { day: '13', conv: 84 }, { day: '15', conv: 72 }, { day: '17', conv: 91 },
-    { day: '19', conv: 88 }, { day: '21', conv: 95 }, { day: '23', conv: 82 },
-    { day: '25', conv: 104 },{ day: '27', conv: 96 }, { day: '30', conv: 112 },
-];
-
-const revenueBreakdown = [
-    { name: 'Advertiser A', value: 18500 },
-    { name: 'Advertiser B', value: 12000 },
-    { name: 'Advertiser C', value: 9731  },
-    { name: 'Direct',        value: 5000  },
-];
-
-const PIE_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#3b82f6'];
-
-
-const recentConversions = [
-    { user: 'Rahul Sharma', offer: 'HDFC CashBack App',  amount: '₹45',  status: 'completed',        time: '2m ago' },
-    { user: 'Priya Singh',  offer: 'Amazon Survey',      amount: '₹20',  status: 'pending_approval', time: '8m ago' },
-    { user: 'Amit Patel',   offer: 'Groww Invest App',   amount: '₹150', status: 'completed',        time: '15m ago' },
-    { user: 'Sneha Roy',    offer: 'Zepto First Order',  amount: '₹30',  status: 'pending_approval', time: '22m ago' },
-    { user: 'Karan Mehta',  offer: 'HDFC CashBack App',  amount: '₹45',  status: 'completed',        time: '35m ago' },
-];
-
-const STATUS_CLS = {
-    completed:        'bg-emerald-100 text-emerald-700',
-    pending_approval: 'bg-amber-100 text-amber-700',
-    rejected:         'bg-red-100 text-red-700',
-};
-const STATUS_LBL = {
-    completed:        'Completed',
-    pending_approval: 'Pending',
-    rejected:         'Rejected',
-};
-
-/* ── Custom Tooltip ───────────────────────────────────────────────────────── */
-function CustomTooltip({ active, payload, label, isDark, prefix = '₹', suffix = '' }) {
-    if (!active || !payload?.length) return null;
     return (
-        <div className={`rounded-xl px-4 py-3 shadow-xl border text-xs backdrop-blur-xl ${isDark ? 'bg-slate-900/80 border-white/10 text-slate-100' : 'bg-white/90 border-gray-200 text-gray-900'}`}>
-            <p className="font-bold mb-2 uppercase tracking-widest text-[9px] opacity-50">{label}</p>
-            {payload.map((p) => (
-                <div key={p.dataKey} className="flex items-center gap-3 mb-1 last:mb-0">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-                    <div className="flex-1 flex items-center justify-between gap-4">
-                        <span className="capitalize font-medium opacity-70">{p.name}</span>
-                        <span className="font-black">{prefix}{typeof p.value === 'number' ? p.value.toLocaleString() : p.value}{suffix}</span>
-                    </div>
+        <section className={panel}>
+            <div className="mb-4 flex items-baseline justify-between gap-2">
+                <div>
+                    <h3 className="font-semibold text-slate-900">{title}</h3>
+                    {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
                 </div>
-            ))}
-        </div>
+                <span className="text-xs font-medium tabular-nums text-slate-500">
+                    Total: <strong className="text-slate-900">{valueFormatter ? valueFormatter(total) : total.toLocaleString('en-IN')}</strong>
+                </span>
+            </div>
+
+            {nonZero.length > 0 ? (
+                <div className="flex flex-wrap items-center gap-4">
+                    <div className="h-48 min-w-0 flex-[1_1_11rem]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={nonZero}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    innerRadius="54%"
+                                    outerRadius="86%"
+                                    paddingAngle={2}
+                                    stroke="transparent"
+                                >
+                                    {nonZero.map((entry) => (
+                                        <Cell key={entry.name} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip content={<ChartTooltip isCurrency={Boolean(valueFormatter)} />} />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <ul className="flex-[1_1_9rem] space-y-2">
+                        {data.map((item) => (
+                            <li key={item.name} className="flex items-center gap-2 text-sm">
+                                <span aria-hidden="true" className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+                                <span className="truncate text-slate-700">{item.name}</span>
+                                <strong className="ml-auto tabular-nums text-slate-900">
+                                    {valueFormatter ? valueFormatter(item.value) : item.value.toLocaleString('en-IN')}
+                                </strong>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            ) : (
+                <p className="py-16 text-center text-sm text-slate-500">{emptyMessage}</p>
+            )}
+        </section>
     );
 }
 
-/* ── Main ─────────────────────────────────────────────────────────────────── */
 export default function MainDashboard() {
-    const tc = useThemeClasses();
-    const { isDark } = tc;
-
-    const { data: statsData, isLoading } = useQuery({
+    const query = useQuery({
         queryKey: ['adminDashboardStats'],
-        queryFn: () => getDashboardStats()
+        queryFn: async () => (await getDashboardStats()).data.data,
     });
 
-    const stats = statsData || {};
+    if (query.isLoading) {
+        return (
+            <div className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6">
+                <div className="h-8 w-48 animate-pulse rounded-lg bg-slate-200" />
+                <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                        <div key={i} className="h-24 animate-pulse rounded-xl border border-slate-200 bg-white" />
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
-    const dynamicStatCards = [
-        { label: 'Total Campaigns',    value: stats.totalCampaigns || '0',       sub: `+${stats.campaignsThisMonth || 0} this month`,  Icon: FiTarget,     colorClass: 'text-indigo-600', bgClass: 'bg-indigo-50', isGolden: true },
-        { label: 'Total Revenue',      value: `₹${(stats.totalRevenue || 0).toLocaleString()}`, sub: 'From settled conversions', Icon: FaRupeeSign, colorClass: 'text-emerald-600', bgClass: 'bg-emerald-50', isEmerald: true },
-        { label: 'Active Offers',      value: stats.activeOffers || '0',         sub: `${stats.pausedOffers || 0} paused`,        Icon: FiTag,        colorClass: 'text-amber-600',  bgClass: 'bg-amber-50', isGolden: true },
-        { label: 'Pending Approvals',  value: stats.pendingApprovals || '0',     sub: 'Need review',     Icon: FiClock,      colorClass: 'text-orange-600', bgClass: 'bg-orange-50', isGolden: true },
-        { label: 'Pending Withdrawals',value: `₹${(stats.pendingWithdrawalsAmount || 0).toLocaleString()}`, sub: `${stats.pendingWithdrawalsCount || 0} requests`, Icon: FiCreditCard, colorClass: 'text-violet-600', bgClass: 'bg-violet-50', isGolden: true },
-        { label: 'Total Users',        value: stats.totalUsers || '0',           sub: `+${stats.usersThisWeek || 0} this week`,   Icon: FiUsers,      colorClass: 'text-rose-600',   bgClass: 'bg-rose-50', isGolden: true },
-    ];
+    if (query.isError) {
+        return (
+            <div className="mx-auto max-w-7xl p-4 sm:p-6">
+                <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+                    Unable to load dashboard analytics.{' '}
+                    <button type="button" onClick={() => query.refetch()} className="font-semibold underline">
+                        Try again
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    const stats = query.data || {};
+    const dailyTrend = stats.dailyTrend || [];
+    const topOffers = stats.topOffers || [];
+    const recentActivity = stats.recentActivity || [];
+
+    // Payout donut data (count-based with amount tooltip or amount in INR)
+    const payoutMap = new Map((stats.payoutStatusStats || []).map((p) => [p._id, p]));
+    const payoutDonutData = PAYOUT_STATUS_META.map((meta) => ({
+        name: meta.label,
+        color: meta.color,
+        value: Math.round((payoutMap.get(meta.key)?.amountPaise || 0) / 100),
+    }));
+
+    // Click status donut data
+    const clickMap = new Map((stats.clickStatusStats || []).map((c) => [c._id, c.count]));
+    const clickDonutData = CLICK_STATUS_META.map((meta) => ({
+        name: meta.label,
+        color: meta.color,
+        value: clickMap.get(meta.key) || 0,
+    }));
+
+    // Offer category donut data
+    const categoryDonutData = (stats.offerCategoryStats || []).map((cat, idx) => ({
+        name: cat._id || 'General',
+        color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length],
+        value: cat.count || 0,
+    }));
+
+    const conversionRate = stats.totalClicks > 0
+        ? ((stats.completedConversions / stats.totalClicks) * 100).toFixed(1)
+        : '0.0';
 
     return (
-        <div className={`min-h-screen ${isDark ? tc.page : 'bg-gradient-to-br from-rose-50/40 via-white to-indigo-50/40'}`}>
-
-            <div className="relative z-10 max-w-full mx-auto space-y-8 p-4 sm:p-6 lg:p-10 xl:px-14">
-
-                {/* Page header */}
-                <div className="flex items-center justify-between">
+        <div className="min-h-screen bg-slate-50 text-slate-900">
+            <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
+                {/* ── Page Header ── */}
+                <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <h1 className={`text-3xl font-black tracking-tight drop-shadow-sm ${tc.text}`}>Overview</h1>
-                        <p className={`text-xs font-bold uppercase tracking-[0.2em] opacity-40 mt-1 ${tc.text}`}>Analytics Dashboard</p>
+                        <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Overview</h1>
+                        <p className="text-sm text-slate-500">Real-time platform analytics · Last 14 days</p>
                     </div>
+                    <button
+                        type="button"
+                        onClick={() => query.refetch()}
+                        disabled={query.isFetching}
+                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                    >
+                        <FiRefreshCw className={query.isFetching ? 'animate-spin' : ''} size={14} />
+                        Refresh
+                    </button>
                 </div>
 
-                {/* ── 6 Stat cards ── */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-5">
-                    {dynamicStatCards.map((c) => <DashboardStatCard key={c.label} {...c} isLoading={isLoading} />)}
-                </div>
+                {/* ── 8 KPI Metrics (Clean Slate Grid) ── */}
+                <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                    <Metric label="Total revenue" icon={FaRupeeSign}>
+                        {moneyFromPaise(stats.totalRevenue)}
+                    </Metric>
+                    <Metric label="User payouts" icon={FiGift}>
+                        {moneyFromPaise(stats.totalUserPayouts)}
+                    </Metric>
+                    <Metric label="Platform margin" icon={FiTrendingUp}>
+                        {moneyFromPaise(stats.totalMargin)}
+                    </Metric>
+                    <Metric label={`Pending payouts (${stats.pendingPayoutsCount || 0})`} icon={FiCreditCard}>
+                        {moneyFromPaise(stats.pendingPayoutsAmount)}
+                    </Metric>
+                    <Metric label="Total clicks" icon={FiMousePointer}>
+                        {Number(stats.totalClicks || 0).toLocaleString('en-IN')}
+                    </Metric>
+                    <Metric label={`Conversions (${conversionRate}%)`} icon={FiCheckCircle}>
+                        {Number(stats.completedConversions || 0).toLocaleString('en-IN')}
+                    </Metric>
+                    <Metric label="Active offers" icon={FiTag}>
+                        {Number(stats.activeOffers || 0).toLocaleString('en-IN')}
+                    </Metric>
+                    <Metric label="Total campaigns" icon={FiTarget}>
+                        {Number(stats.totalCampaigns || 0).toLocaleString('en-IN')}
+                    </Metric>
+                </dl>
 
-                {/* ── Revenue Bar Chart + Donut ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                    {/* Bar Chart (2/3) */}
-                    <GlassCard isDark={isDark} className="lg:col-span-2">
-                        <div className="flex flex-wrap items-start justify-between gap-3 mb-8">
+                {/* ── Row 1: Revenue Bar Chart + Payouts Donut ── */}
+                <div className="grid gap-4 lg:grid-cols-3">
+                    <section className={`${panel} lg:col-span-2`}>
+                        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                             <div>
-                                <h3 className={`text-lg font-black tracking-tight ${tc.text}`}>Revenue Overview</h3>
-                                <p className={`text-xs font-bold uppercase tracking-widest opacity-40 mt-1 ${tc.text}`}>Monthly Performance</p>
+                                <h3 className="font-semibold text-slate-900">Revenue, Payouts & Margin</h3>
+                                <p className="text-xs text-slate-500">Daily financial performance (INR)</p>
                             </div>
-                            <span className={`text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border ${isDark ? 'bg-white/5 border-white/10 text-slate-300' : 'bg-gray-100 border-gray-200 text-gray-600'}`}>
-                                Last 6 months
-                            </span>
+                            <div className="flex items-center gap-3 text-xs text-slate-600">
+                                <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-indigo-600" />Revenue</span>
+                                <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-emerald-600" />Payouts</span>
+                                <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-amber-500" />Margin</span>
+                            </div>
                         </div>
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={monthlyRevenue} barGap={4} barCategoryGap="30%">
-                                    <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} vertical={false} />
-                                    <XAxis dataKey="month" tick={{ fontSize: 10, fontWeight: 700, fill: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' }} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{ fontSize: 9, fontWeight: 700, fill: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
-                                    <Tooltip content={<CustomTooltip isDark={isDark} />} cursor={{ fill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', radius: 8 }} />
-                                    <Bar dataKey="revenue" name="Revenue" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={32} />
-                                    <Bar dataKey="payouts"  name="Payouts" fill={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(99,102,241,0.2)'} radius={[4, 4, 0, 0]} maxBarSize={32} />
+                                <BarChart data={dailyTrend} margin={{ left: 0, right: 8 }}>
+                                    <CartesianGrid vertical={false} stroke="#e2e8f0" />
+                                    <XAxis dataKey="day" tickFormatter={formatDay} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                                    <YAxis width={42} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v}`} />
+                                    <Tooltip content={<ChartTooltip isCurrency isDateLabel />} />
+                                    <Bar dataKey="revenue" name="Revenue" fill="#4f46e5" maxBarSize={24} radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="payouts" name="Payouts" fill="#059669" maxBarSize={24} radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="margin" name="Margin" fill="#f59e0b" maxBarSize={24} radius={[4, 4, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
-                    </GlassCard>
+                    </section>
 
-                    {/* Donut Chart (1/3) */}
-                    <GlassCard isDark={isDark}>
-                        <h3 className={`text-lg font-black tracking-tight ${tc.text}`}>Advertisers</h3>
-                        <p className={`text-xs font-bold uppercase tracking-widest opacity-40 mt-1 mb-6 ${tc.text}`}>Revenue Share</p>
-                        <div className="h-48 relative">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={revenueBreakdown}
-                                        cx="50%" cy="50%"
-                                        innerRadius={55} outerRadius={75}
-                                        paddingAngle={4} dataKey="value"
-                                        stroke="transparent"
-                                    >
-                                        {revenueBreakdown.map((_, i) => (
-                                            <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip content={<CustomTooltip isDark={isDark} />} />
-                                </PieChart>
-                            </ResponsiveContainer>
-                            {/* Center Info */}
-                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                <span className={`text-xs font-black uppercase tracking-tighter opacity-30 ${tc.text}`}>Total</span>
-                                <span className={`text-xl font-black ${tc.text}`}>₹45k</span>
-                            </div>
-                        </div>
-                        <div className="space-y-3 mt-6">
-                            {revenueBreakdown.map(({ name, value }, i) => (
-                                <div key={name} className="flex items-center justify-between group/item cursor-default">
-                                    <div className="flex items-center gap-3">
-                                        <span className="w-2 h-2 rounded-full transition-transform group-hover/item:scale-125"
-                                            style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                                        <span className={`text-[11px] font-bold uppercase tracking-wider opacity-60 ${tc.text}`}>{name}</span>
-                                    </div>
-                                    <span className={`text-xs font-black ${tc.text}`}>₹{value.toLocaleString()}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </GlassCard>
+                    <DonutCard
+                        title="Payouts by status"
+                        subtitle="Amount distribution (INR)"
+                        data={payoutDonutData}
+                        emptyMessage="No payouts recorded yet."
+                        valueFormatter={(val) => `₹${val.toLocaleString('en-IN')}`}
+                    />
                 </div>
 
-                {/* ── Conversion Area Chart ── */}
-                <GlassCard isDark={isDark}>
-                    <div className="flex flex-wrap items-start justify-between gap-3 mb-8">
-                        <div>
-                            <h3 className={`text-lg font-black tracking-tight ${tc.text}`}>Conversion Trend</h3>
-                            <p className={`text-xs font-bold uppercase tracking-widest opacity-40 mt-1 ${tc.text}`}>Daily Performance Cycle</p>
+                {/* ── Row 2: Clicks & Conversions Area Chart + Click Status Donut ── */}
+                <div className="grid gap-4 lg:grid-cols-3">
+                    <section className={`${panel} lg:col-span-2`}>
+                        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <h3 className="font-semibold text-slate-900">Clicks & Conversion Trend</h3>
+                                <p className="text-xs text-slate-500">14-day traffic and completion velocity</p>
+                            </div>
+                            <div className="flex items-center gap-3 text-xs text-slate-600">
+                                <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-blue-500" />Clicks</span>
+                                <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-emerald-500" />Conversions</span>
+                            </div>
                         </div>
-                        <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-500 px-4 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 shadow-sm shadow-emerald-500/10`}>
-                            <FiTrendingUp size={14} className="animate-pulse" />
-                            +23.4% Growth
+                        <div className="h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={dailyTrend} margin={{ left: 0, right: 8 }}>
+                                    <defs>
+                                        <linearGradient id="clicksGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.22} />
+                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                        </linearGradient>
+                                        <linearGradient id="convGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.28} />
+                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid vertical={false} stroke="#e2e8f0" />
+                                    <XAxis dataKey="day" tickFormatter={formatDay} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                                    <YAxis width={36} allowDecimals={false} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                                    <Tooltip content={<ChartTooltip isDateLabel />} />
+                                    <Area type="monotone" dataKey="clicks" name="Clicks" stroke="#3b82f6" strokeWidth={2} fill="url(#clicksGrad)" />
+                                    <Area type="monotone" dataKey="conversions" name="Conversions" stroke="#10b981" strokeWidth={2.5} fill="url(#convGrad)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
                         </div>
-                    </div>
-                    <div className="h-56">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={conversionTrend}>
-                                <defs>
-                                    <linearGradient id="convGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%"  stopColor="#10b981" stopOpacity={isDark ? 0.3 : 0.2} />
-                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} vertical={false} />
-                                <XAxis dataKey="day" tick={{ fontSize: 10, fontWeight: 700, fill: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' }} axisLine={false} tickLine={false} />
-                                <YAxis tick={{ fontSize: 9, fontWeight: 700, fill: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' }} axisLine={false} tickLine={false} />
-                                <Tooltip content={<CustomTooltip isDark={isDark} prefix="" suffix=" conv" />} />
-                                <Area
-                                    type="monotone" dataKey="conv" name="Conversions"
-                                    stroke="#10b981" strokeWidth={3}
-                                    fill="url(#convGrad)"
-                                    dot={false}
-                                    activeDot={{ r: 6, fill: '#10b981', stroke: isDark ? '#0f172a' : '#fff', strokeWidth: 2 }}
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </GlassCard>
+                    </section>
 
-                {/* ── Recent Conversions Table (Glass Styled) ── */}
-                <GlassCard isDark={isDark} className="overflow-hidden">
-                    <div className="flex items-center justify-between mb-8">
+                    <DonutCard
+                        title="Clicks by outcome"
+                        subtitle="All-time tracking status"
+                        data={clickDonutData}
+                        emptyMessage="No clicks tracked yet."
+                    />
+                </div>
+
+                {/* ── Row 3: Top Offers Bar Chart + Offers by Category Donut ── */}
+                <div className="grid gap-4 lg:grid-cols-3">
+                    <section className={`${panel} lg:col-span-2`}>
+                        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <h3 className="font-semibold text-slate-900">Top Performing Offers</h3>
+                                <p className="text-xs text-slate-500">Clicks vs completed conversions</p>
+                            </div>
+                            <Link to="/admin/offers" className="text-xs font-semibold text-indigo-600 hover:text-indigo-800">
+                                View all offers &rarr;
+                            </Link>
+                        </div>
+                        {topOffers.length > 0 ? (
+                            <div className="h-60">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={topOffers} margin={{ left: 0, right: 8 }}>
+                                        <CartesianGrid vertical={false} stroke="#e2e8f0" />
+                                        <XAxis
+                                            dataKey="name"
+                                            tick={{ fontSize: 11, fill: '#64748b' }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                            tickFormatter={(v) => (v.length > 14 ? `${v.slice(0, 14)}…` : v)}
+                                        />
+                                        <YAxis width={36} allowDecimals={false} tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                                        <Tooltip content={<ChartTooltip />} />
+                                        <Bar dataKey="clicks" name="Clicks" fill="#6366f1" maxBarSize={28} radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="conversions" name="Conversions" fill="#10b981" maxBarSize={28} radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        ) : (
+                            <p className="py-16 text-center text-sm text-slate-500">No offer traffic recorded yet.</p>
+                        )}
+                    </section>
+
+                    <DonutCard
+                        title="Offers by category"
+                        subtitle="Active & paused catalog"
+                        data={categoryDonutData}
+                        emptyMessage="No offers created yet."
+                    />
+                </div>
+
+                {/* ── Row 4: Recent Activity Table ── */}
+                <section className={panel}>
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                         <div>
-                            <h3 className={`text-xl font-black tracking-tight ${tc.text}`}>Recent Activity</h3>
-                            <p className={`text-xs font-bold uppercase tracking-widest opacity-40 mt-1 ${tc.text}`}>Live Conversion Stream</p>
+                            <h3 className="font-semibold text-slate-900">Recent Activity</h3>
+                            <p className="text-xs text-slate-500">Latest user clicks and completions</p>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            <span className={`text-[10px] font-black uppercase tracking-widest opacity-60 ${tc.text}`}>Live Sync</span>
-                        </div>
+                        <Link to="/admin/conversions" className="text-xs font-semibold text-indigo-600 hover:text-indigo-800">
+                            View full report &rarr;
+                        </Link>
                     </div>
-                    <div className="overflow-x-auto -mx-6">
-                        <table className="w-full min-w-[700px]">
-                            <thead>
-                                <tr className={`border-b ${isDark ? 'border-white/5' : 'border-black/5'}`}>
-                                    <th className={`text-left px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] opacity-40 ${tc.text}`}>User</th>
-                                    <th className={`text-left px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] opacity-40 ${tc.text}`}>Offer</th>
-                                    <th className={`text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] opacity-40 ${tc.text}`}>Amount</th>
-                                    <th className={`text-center px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] opacity-40 ${tc.text}`}>Status</th>
-                                    <th className={`text-right px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] opacity-40 ${tc.text}`}>Time</th>
-                                </tr>
-                            </thead>
-                            <tbody className={`divide-y ${isDark ? 'divide-white/5' : 'divide-black/5'}`}>
-                                {recentConversions.map((c, i) => (
-                                    <tr key={i} className="group/row transition-colors hover:bg-white/[0.02]">
-                                        <td className={`px-8 py-5 text-sm font-bold ${tc.text}`}>{c.user}</td>
-                                        <td className={`px-8 py-5 text-xs font-bold opacity-60 ${tc.text}`}>{c.offer}</td>
-                                        <td className={`px-8 py-5 text-right text-sm font-black text-emerald-500`}>{c.amount}</td>
-                                        <td className="px-8 py-5 text-center">
-                                            <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${STATUS_CLS[c.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                                                {STATUS_LBL[c.status] ?? c.status}
-                                            </span>
-                                        </td>
-                                        <td className={`px-8 py-5 text-right text-xs font-bold opacity-40 ${tc.text}`}>{c.time}</td>
+
+                    {recentActivity.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="w-full min-w-[600px] text-left text-sm">
+                                <thead>
+                                    <tr className="border-b border-slate-200 text-xs font-medium text-slate-500">
+                                        <th className="py-2.5 pr-4">Account</th>
+                                        <th className="py-2.5 pr-4">Offer</th>
+                                        <th className="py-2.5 pr-4 text-right">Earned</th>
+                                        <th className="py-2.5 pr-4 text-center">Status</th>
+                                        <th className="py-2.5 text-right">Time</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </GlassCard>
-
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {recentActivity.map((item) => (
+                                        <tr key={item.id} className="hover:bg-slate-50/70">
+                                            <td className="py-3 pr-4 font-medium text-slate-900">
+                                                <span>{item.account}</span>
+                                                <span className="ml-2 text-xs text-slate-400">{item.payoutType}</span>
+                                            </td>
+                                            <td className="py-3 pr-4 text-slate-600">{item.offerName}</td>
+                                            <td className="py-3 pr-4 text-right font-semibold tabular-nums text-emerald-700">
+                                                {moneyFromPaise(item.amountPaise)}
+                                            </td>
+                                            <td className="py-3 pr-4 text-center">
+                                                <span
+                                                    className={`inline-block rounded-full border px-2.5 py-0.5 text-[11px] font-medium capitalize ${
+                                                        ACTIVITY_STATUS_BADGE[item.status] || 'border-slate-200 bg-slate-100 text-slate-600'
+                                                    }`}
+                                                >
+                                                    {String(item.status || '').replaceAll('_', ' ')}
+                                                </span>
+                                            </td>
+                                            <td className="py-3 text-right text-xs text-slate-500">
+                                                {item.createdAt ? new Date(item.createdAt).toLocaleString('en-IN') : '—'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <p className="py-10 text-center text-sm text-slate-500">No recent activity found.</p>
+                    )}
+                </section>
             </div>
         </div>
     );
