@@ -22,6 +22,7 @@ const INITIAL_FORM = {
     offerName: '',
     comment: '',
     steps: '',
+    journeyStepsText: '',
     termsAndConditions: '',
     referTermsAndConditions: '',
     status: 'active',
@@ -159,6 +160,7 @@ export default function OfferCreateModal({
         const payload = {
             offer: {
                 ...offerFields,
+                journeySteps: (form.journeyStepsText || '').split(',').map((s) => s.trim()).filter(Boolean),
                 spinSettings: {
                     enabled: !!form.spinEnabled,
                     slices: form.spinSlices && form.spinSlices.length ? form.spinSlices : [5, 10, 15, 20, 25]

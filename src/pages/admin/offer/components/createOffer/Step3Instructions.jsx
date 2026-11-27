@@ -43,6 +43,23 @@ export default function Step3Instructions({ form, onChange, onUploadingChange })
                 </p>
             </div>
 
+            {/* 2b. Reward Journey Stepper */}
+            <div>
+                <label className="text-xs font-bold text-slate-900 uppercase tracking-wider block mb-1.5">
+                    Reward Journey Steps
+                </label>
+                <input
+                    type="text"
+                    value={form.journeyStepsText || ''}
+                    onChange={(e) => onChange('journeyStepsText', e.target.value)}
+                    placeholder="Click, Install, Register, KYC"
+                    className="w-full px-3.5 py-2.5 text-xs font-medium rounded-lg bg-white border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-colors shadow-2xs"
+                />
+                <p className="mt-1 text-[11px] text-slate-500">
+                    Comma-separated milestone pills shown in &ldquo;Your reward journey&rdquo;. Leave blank to auto-generate from selected events.
+                </p>
+            </div>
+
             {/* 3. Terms & Conditions */}
             <div>
                 <label className="text-xs font-bold text-slate-900 uppercase tracking-wider block mb-1.5">

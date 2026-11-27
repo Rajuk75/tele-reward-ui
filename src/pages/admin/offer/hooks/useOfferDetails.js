@@ -24,6 +24,7 @@ export function buildForm(offer, campaign) {
         ...offer,
         campaignId: offer.campaignId?._id || offer.campaignId,
         events,
+        journeyStepsText: Array.isArray(offer.journeySteps) ? offer.journeySteps.join(', ') : '',
         inputEnabled: !!offer.inputs?.length,
         spinEnabled: !!offer.spinSettings?.enabled,
         spinSlicesText: slices.join(', '),

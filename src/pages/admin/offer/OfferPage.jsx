@@ -7,8 +7,10 @@ import {
     MoreVerticalIcon,
     ChevronRightIcon,
     CheckIcon,
-    CloseIcon
+    CloseIcon,
+    CopyIcon
 } from '../../../components/common/Icons';
+import { showSuccess, showError } from '../../../components/Toastify/Toast';
 import { useQueryState } from '../../../hooks/useQueryState';
 
 // Custom Hooks
@@ -75,6 +77,35 @@ function StatusPill({ status, isActive }) {
         <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200/80 capitalize">
             Inactive
         </span>
+    );
+}
+
+function CopyTaskLinkButton({ offer }) {
+    const [copied, setCopied] = useState(false);
+    const taskUrl = offer.taskUrl || `${window.location.origin}/task/${offer.offerId || offer._id}`;
+
+    const handleCopy = async (e) => {
+        e.stopPropagation();
+        try {
+            await navigator.clipboard.writeText(taskUrl);
+            setCopied(true);
+            showSuccess('Task link copied');
+            setTimeout(() => setCopied(false), 1800);
+        } catch {
+            showError('Failed to copy link');
+        }
+    };
+
+    return (
+        <button
+            type="button"
+            onClick={handleCopy}
+            title={taskUrl}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-mono font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer"
+        >
+            <span>{offer.offerId || 'Copy'}</span>
+            {copied ? <CheckIcon size={12} className="text-emerald-600" /> : <CopyIcon size={12} className="text-slate-400" />}
+        </button>
     );
 }
 
@@ -259,7 +290,7 @@ export default function OfferPage() {
         },
         {
             header: 'Public App',
-            className: 'w-[11%]',
+            className: 'w-[10%]',
             align: 'center',
             render: (o) => (
                 <span
@@ -272,6 +303,12 @@ export default function OfferPage() {
                     {o.offerDisplay ? 'Visible' : 'Hidden'}
                 </span>
             ),
+        },
+        {
+            header: 'Task Link',
+            className: 'w-[12%]',
+            align: 'center',
+            render: (o) => <CopyTaskLinkButton offer={o} />,
         },
         {
             header: 'Actions',

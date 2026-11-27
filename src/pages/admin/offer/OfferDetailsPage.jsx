@@ -95,8 +95,7 @@ function OfferView({ offer }) {
     const events = Array.isArray(offer.events) ? offer.events : [];
     const total = offer.totalPayout ?? events.reduce((sum, row) => sum + Number(row.userPayout || 0), 0);
     const cap = offer.totalCap ?? events.reduce((sum, row) => sum + Number(row.campaignEventId?.cap || 0), 0);
-    const taskOrigin = new URL(import.meta.env.VITE_API_URL || window.location.origin, window.location.origin).origin;
-    const taskUrl = `${taskOrigin}/task/${offer._id}`;
+    const taskUrl = offer.taskUrl || `${window.location.origin}/task/${offer.offerId || offer._id}`;
     const [failedLogo, setFailedLogo] = useState(null);
 
     const [editing, setEditing] = useState(null);
@@ -146,6 +145,7 @@ function OfferView({ offer }) {
                     {offer.backgroundImage && <img src={offer.backgroundImage} alt="Offer banner" className="max-h-56 w-full rounded-lg object-contain" />}
                     <dl className="space-y-3 border-t border-slate-100 pt-4">
                         <Detail label="Completion steps">{offer.steps}</Detail>
+                        <Detail label="Reward journey">{offer.journeySteps?.length ? offer.journeySteps.join(' → ') : 'Auto (from events)'}</Detail>
                         <Detail label="Offer terms">{offer.termsAndConditions}</Detail>
                         <Detail label="Referral terms">{offer.referTermsAndConditions}</Detail>
                     </dl>

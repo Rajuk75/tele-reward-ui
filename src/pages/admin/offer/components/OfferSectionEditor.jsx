@@ -14,6 +14,7 @@ function basicPayload(form) {
     }
     return { offer: {
         offerName: form.offerName.trim(), comment: form.comment.trim(), steps: form.steps ?? '',
+        journeySteps: (form.journeyStepsText || '').split(',').map((s) => s.trim()).filter(Boolean),
         termsAndConditions: form.termsAndConditions.trim(), referTermsAndConditions: form.referTermsAndConditions ?? '',
         backgroundImage: form.backgroundImage ?? '',
     } };
